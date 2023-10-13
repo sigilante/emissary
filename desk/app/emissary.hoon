@@ -1,5 +1,9 @@
-/-  *emissary
-/+  default-agent, dbug, *emissary
+/-  *emissary, hark
+/+  default-agent, dbug, *emissary, rudder
+::
+/~  patron-pages  (page:rudder [(set ship) (map ship status) (set ship)] trigger)  /app/emissary/webui/patron
+::/~  delegate-pages  (page:rudder (set ship) trigger)  /app/emissary/webui/delegate
+::
 |%
 +$  versioned-state
   $%  state-zero
@@ -39,7 +43,11 @@
   |=  =path
   ^-  (unit (unit cage))
   (peek:eng path)
-++  on-arvo   on-arvo:default
+++  on-arvo
+  |=  [=wire =sign-arvo]
+  ^-  (quip card _this)
+  =^  cards  state  abet:(arvo:eng wire sign-arvo) 
+  [cards this]
 ++  on-watch
   |=  =path
   ^-  (quip card _this)
@@ -61,10 +69,11 @@
 ++  abet
   ^-  (quip card _state)
   [(flop deck) state]
+++  connect  [%pass /eyre/connect %arvo %e %connect [~ /apps/[dap.bol]] dap.bol]
 ::
 ++  init
   ^+  that
-  that
+  (emit connect)
 ::
 ++  load
   |=  vaz=vase
@@ -80,12 +89,16 @@
     [%y %patrons ~]          ``emissary-demand+!>([%patrons patrons])
     [%x %delegate ship=@ ~]  ``emissary-demand+!>([%delegate (~(has by delegates) ship:pol)])
     [%x %patron ship=@ ~]    ``emissary-demand+!>([%patron (~(has in patrons) ship:pol)])
+    :: TODO requests
   ==
 ::
 ++  watch
   |=  pol=(pole knot)
   ^+  that
   ?+    pol  ~|(%invalid-watch-path !!)
+  ::
+      [%http-response *]
+    that
   ::  /request does nothing until the point has made a decision
       [%request ~]
     =^  cards  state
@@ -126,24 +139,53 @@
     ==  ::  sign
   ==  ::  wire
 ::
+++  arvo
+  |=  [wire=(pole knot) =sign-arvo]
+  ^+  that
+  ~&  >  wire
+  ?+  sign-arvo  ~|(%bad-arvo-wire !!)
+    [%eyre %bound *]  that
+  ==
+::
 ++  poke
   |=  [=mark =vase]
   ^+  that
-  =^  cards  state
-   ?+    mark  ~|(%invalid-poke !!)
-        %emissary-trigger
-      =/  tri  !<(trigger vase)
-      de-abet:(de-poke-trigger:(de-abed:de delegates) tri)
-      ::
-        %emissary-action
-      =/  axn  !<(action vase)
-      pa-abet:(pa-poke-action:(pa-abed:pa patrons requests) axn)
-      ::
-        %emissary-response
-      =/  res  !<(response vase)
-      pa-abet:(pa-poke-response:(pa-abed:pa patrons requests) res)
-    ==  ::  mark
-  (emil cards)
+  ?+    mark  ~|(%invalid-poke !!)
+      %emissary-trigger
+    =^  cards  state
+    =/  tri  !<(trigger vase)
+    de-abet:(de-poke-trigger:(de-abed:de delegates) tri)
+    (emil cards)
+    ::
+      %emissary-action
+    =^  cards  state
+    =/  axn  !<(action vase)
+    pa-abet:(pa-poke-action:(pa-abed:pa patrons requests) axn)
+    (emil cards)
+    ::
+      %emissary-response
+    =^  cards  state
+    =/  res  !<(response vase)
+    pa-abet:(pa-poke-response:(pa-abed:pa patrons requests) res)
+    (emil cards)
+    ::
+      %handle-http-request
+    ::=/  req  !<(http-request vase)
+    =;  out=(quip card _+.state)
+      =.  +.state  +.out
+      :: flop here so that the kick from rudder isn't first
+      (emil (flop -.out))
+    %.  [bol !<(order:rudder vase) +.state]
+    %-  (steer:rudder _+.state trigger)
+    :^    patron-pages
+        (point:rudder /apps/[dap.bol] & ~(key by patron-pages))
+      (fours:rudder +.state)
+    |=  tri=trigger
+    ^-  $@(brief:rudder [brief:rudder (list card) _+.state])
+    =.  that  (poke %emissary-trigger !>(tri))
+    ['Processed succesfully.' deck +.state]
+    :: TODO: branch on type of request (patron/delegate)
+  ==  ::  mark
 ::  delegates core
 ++  de
   |_  $:  delegates=(map ship status)
@@ -231,7 +273,15 @@
           ==
         (pa-emil new-cards)
       =.  requests  (~(put in requests) src.bol)
-      pa
+      :: TODO hark notification logic here
+      =/  new-cards
+        ?.  .^(? %gu /(scot %p our.bol)/hark-store/(scot %da now.bol))  ~
+        =/  con=(list content:hark)  [[%ship src.bol] 'Designation request received.' ~]
+        =/  =id:hark      (end 7 (shas %emissary-trigger eny.bol))
+        =/  =rope:hark    [~ ~ q.byk.bol /(scot %p src.bol)/[dap.bol]]
+        =/  =action:hark  [%add-yarn & & id rope now.bol con /[dap.bol] ~]
+        [%pass /hark %agent [our.bol %hark] %poke %hark-action !>(action)]~
+      (pa-emil new-cards)
     ::
         %revoke
       ?.  (~(has in patrons) src.bol)  (pa-emil ~)

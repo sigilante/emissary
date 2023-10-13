@@ -12,7 +12,7 @@ User story:
 2. The planet operator (same person presumably) can then make a claim on their ship at an endpoint or scry path or whatever that they have the designation from a star.
 3. A third-party app should check both the planet claim and the star claim, which requires the star to be online.
 
-So there are two agents in `%emissary`:
+So there is one agents in `%emissary` that carries out two roles:
 
 1. Designator (for the star)
 2. Testator (for the planet)
@@ -34,5 +34,10 @@ So there are two agents in `%emissary`:
   - ++on-agent
 - [x] restrict asset classes
 - [~] test and validate behavior
-- [ ] add generators to wrap pokes
+- [x] add generators to wrap pokes
+  - :emissary|designate ~lagrev-nocfep   :: on star
 - [ ] add a Sail/Rudder front-end
+- [ ] make a library for 3rd-party developers to use
+- [ ] add hark notifications
+
+- swap pa/de names
