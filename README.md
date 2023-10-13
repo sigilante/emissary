@@ -36,8 +36,12 @@ So there is one agents in `%emissary` that carries out two roles:
 - [~] test and validate behavior
 - [x] add generators to wrap pokes
   - :emissary|designate ~lagrev-nocfep   :: on star
-- [ ] add a Sail/Rudder front-end
+- [~] add a Sail/Rudder front-end
+  - [x] patron-side management
+  - [ ] delegate-side management
 - [ ] make a library for 3rd-party developers to use
-- [ ] add hark notifications
+- [x] add hark notifications
+
+TODO:
 
 - swap pa/de names
