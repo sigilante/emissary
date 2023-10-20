@@ -1,4 +1,4 @@
-  ::  %emissary patron home page
+  ::  %emissary delegate home page
 ::::
 ::
 /-  *emissary
@@ -16,11 +16,11 @@
   ?~  who=(slaw %p (~(gut by args) 'who' ''))
     ~
   ?+    u.what  ~
-      %designate
-    [%designate u.who]
+      %accept
+    [%accept u.who]
     ::
-      %revoke
-    [%revoke u.who]
+      %reject
+    [%reject u.who]
   ==
 ::
 ++  final  (alert:rudder (cat 3 '/apps/' dap.bowl) build)
@@ -36,11 +36,26 @@
   ::
   ++  style
     '''
-    * { margin: 0.2em; padding: 0.2em; font-family: monospace; }
+    body, html {
+        font-family: 'Urbit Sans TT SemiBold', sans-serif;
+        height: 100%;
+        width: 100%;
+        margin: 0;
+    }
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    body > div {
+        max-width: 320px;
+        width: 100%;
+    }
 
-    p { max-width: 50em; }
+    code { font-family: Urbit Sans Mono TT SemiBold, monospace; }
 
-    form { margin: 0; padding: 0; }
+    form { margin: 0.2em; padding: 0.2em; }
 
     .red { font-weight: bold; color: #dd2222; }
     .green { font-weight: bold; color: #229922; }
@@ -52,8 +67,13 @@
       margin-top: 0;
     }
 
-    table#pals tr td:nth-child(2) {
-      padding: 0 0.5em;
+    table {
+        width: 80%;
+    }
+
+    tr:first-of-type {
+        font-weight: 700;
+        color: #918C84;
     }
 
     .sigil {
@@ -76,9 +96,11 @@
       margin-right: 0.5em;
       padding: 0.1em;
     }
+
     .label input[type="text"] {
       max-width: 100px;
     }
+
     .label span {
       margin: 0 0 0 0.2em;
     }
@@ -98,17 +120,23 @@
         ;style:"{(trip style)}"
       ==
       ;body
-        ;h2:"%emissary patron management"
+        ;h1:"%emissary"
+        ;h2:"delegate portal"
 
         `%emissary` allows a star to designate a planet as its representative.
-        This is tied to an operational star, not to ownership on Azimuth.
+        This is tied to an operating star, not to ownership on Azimuth.
+
+        This delegate portal allows you to review, accept, or reject delegation
+        to you from a star.
+
+        Your current patrons are:
 
         ;table#pals
           ;form(method "post")
             ;tr(style "font-weight: bold")
-              ;td:""
+              ;td:"sigil"
               ;td:"@p"
-              ;td:"status"
+              ;td:"action"
             ==
             ;tr
               ;td:""
@@ -116,30 +144,69 @@
                 ;input(type "text", name "who", placeholder "~sampel-palnet");
               ==
               ;td
-                ;button(type "submit", name "what", value "designate"):"»"
+                ;button(type "submit", name "what", value "reject"):"✗"
               ==
             ==
           ==
-          ;*  rejecteds
-          ;*  pendings
-          ;*  valids
+          ;*  patronizeds
+        ==
+
+        Your outstanding requests are:
+
+        ;table#pals
+          ;form(method "post")
+            ;tr(style "font-weight: bold")
+              ;td:"sigil"
+              ;td:"@p"
+              ;td:"action"
+            ==
+            ;tr
+              ;td:""
+              ;td
+                ;input(type "text", name "who", placeholder "~sampel-palnet");
+              ==
+              ;td
+                ;button(type "submit", name "what", value "accept"):"✓"
+                ;button(type "submit", name "what", value "reject"):"✗"
+              ==
+            ==
+          ==
+          ;*  awaiteds
         ==
       ==
     ==
   ::
-  ++  revoker
+  ++  accepter
     |=  =ship
     ^-  manx
     ;form(method "post")
       ;input(type "hidden", name "who", value "{(scow %p ship)}");
-      ;button(type "submit", name "what", value "revoke"):"×"
+      ;button(type "submit", name "what", value "accept"):"✓"
     ==
   ::
-  ++  peers
-    |=  [=status pez=(list [ship status])]
+  ++  rejecter
+    |=  =ship
+    ^-  manx
+    ;form(method "post")
+      ;input(type "hidden", name "who", value "{(scow %p ship)}");
+      ;button(type "submit", name "what", value "reject"):"✗"
+    ==
+  ::
+  ++  awaiteds
+  ^-  (list manx)
+  %-  peers-consider
+  (sort ~(tap in requests) dor)
+  ::
+  ++  patronizeds
+  ^-  (list manx)
+  %-  peers-rejecter
+  (sort ~(tap in patrons) dor)
+  ::
+  ++  peers-consider
+    |=  pez=(list ship)
     ^-  (list manx)
     %+  turn  pez
-    |=  [=ship =^status]
+    |=  =ship
     ^-  manx
     ;tr
       ;td
@@ -148,40 +215,29 @@
       ;td
         ; {(scow %p ship)}
       ==
-      ;+  ?:  ?=(%valid status)
-            ;td
-              ;+  (revoker ship)
-            ==
-          ?:  ?=(%pending status)
-            ;td
-              ;+  (revoker ship)
-            ==
-          ?>  ?=(%rejected status)
-          ;td
-            ;p.red:"rejected"
-          ==
+      ;td
+        ;+  (accepter ship)
+        ;+  (rejecter ship)
+      ==
     ==
   ::
-  ++  valids
+  ++  peers-rejecter
+    |=  pez=(list ship)
     ^-  (list manx)
-    %+  peers  %valid
-    %+  skim  (sort ~(tap by delegates) dor)
-    |=  [=ship =status]
-    ?:(=(%valid status) & |)
-  ::
-  ++  pendings
-    ^-  (list manx)
-    %+  peers  %pending
-    %+  skim  (sort ~(tap by delegates) dor)
-    |=  [=ship =status]
-    ?:(=(%pending status) & |)
-  ::
-  ++  rejecteds
-    ^-  (list manx)
-    %+  peers  %rejected
-    %+  skim  (sort ~(tap by delegates) dor)
-    |=  [=ship =status]
-    ?:(=(%rejected status) & |)
+    %+  turn  pez
+    |=  =ship
+    ^-  manx
+    ;tr
+      ;td
+        ;+  (sigil ship)
+      ==
+      ;td
+        ; {(scow %p ship)}
+      ==
+      ;td
+        ;+  (rejecter ship)
+      ==
+    ==
   ::
   ++  sigil
     |=  =ship
@@ -192,8 +248,8 @@
       ?:((gth avg 0xc1) "black" "white")
     =/  bg=tape
       ((x-co:co 6) bg)
-    ;div.sigil(style "background-color: #{bg}; width: 20px; height: 20px;")
-      ;img@"/emissary/sigil.svg?p={(scow %p ship)}&fg={fg}&bg=%23{bg}&icon&size=20";
+    ;div.sigil(style "background-color: #{bg}; width: 40px; height: 40px;")
+      ;img@"/apps/emissary/sigil.svg?p={(scow %p ship)}&fg={fg}&bg=%23{bg}&icon&size=40";
     ==
   ::
   --

@@ -1,8 +1,8 @@
 /-  *emissary, hark
 /+  default-agent, dbug, *emissary, rudder
 ::
-/~  patron-pages  (page:rudder [(set ship) (map ship status) (set ship)] trigger)  /app/emissary/webui/patron
-::/~  delegate-pages  (page:rudder (set ship) trigger)  /app/emissary/webui/delegate
+/~  pages  (page:rudder [(set ship) (map ship status) (set ship)] trigger)  /app/emissary/webui
+::/~  delegate-pages  (page:rudder [(set ship) (map ship status) (set ship)] trigger)  /app/emissary/webui/delegate
 ::
 |%
 +$  versioned-state
@@ -69,11 +69,16 @@
 ++  abet
   ^-  (quip card _state)
   [(flop deck) state]
-++  connect  [%pass /eyre/connect %arvo %e %connect [~ /apps/[dap.bol]] dap.bol]
+++  connect
+  ^-  (list card)
+  :~  [%pass /eyre/connect %arvo %e %connect [~ /apps/[dap.bol]] dap.bol]
+      [%pass /eyre/connect %arvo %e %connect [~ /apps/[dap.bol]/patron] dap.bol]
+      [%pass /eyre/connect %arvo %e %connect [~ /apps/[dap.bol]/delegate] dap.bol]
+  ==
 ::
 ++  init
   ^+  that
-  (emit connect)
+  (emil connect)
 ::
 ++  load
   |=  vaz=vase
@@ -87,9 +92,9 @@
   ?+    pol  ~|(%invalid-scry-path !!)
     [%y %delegates ~]        ``emissary-demand+!>([%delegates `(set ship)`(silt `(list ship)`(turn (skim ~(tap by delegates) |=([=ship =status] =(%valid status))) head))])
     [%y %patrons ~]          ``emissary-demand+!>([%patrons patrons])
+    [%y %requests ~]         ``emissary-demand+!>([%requests requests])
     [%x %delegate ship=@ ~]  ``emissary-demand+!>([%delegate (~(has by delegates) ship:pol)])
     [%x %patron ship=@ ~]    ``emissary-demand+!>([%patron (~(has in patrons) ship:pol)])
-    :: TODO requests
   ==
 ::
 ++  watch
@@ -102,7 +107,7 @@
   ::  /request does nothing until the point has made a decision
       [%request ~]
     =^  cards  state
-      pa-abet:(pa-watch:(pa-abed:pa patrons requests))
+      de-abet:(de-watch:(de-abed:de patrons requests))
     (emil cards)
   ==
 ::
@@ -117,8 +122,8 @@
       that
       ::
         %fact
-      ?>  ?=(%emissary-answer p.cage.sign)
-      =/  ans  !<(answer q.cage.sign)
+      ?>  ?=(%emissary-response p.cage.sign)
+      =/  ans  !<(response q.cage.sign)
       ?:  =(%accept -.ans)
         that(delegates (~(put by delegates) ship %valid))
       ?>  =(%reject -.ans)
@@ -154,94 +159,39 @@
       %emissary-trigger
     =^  cards  state
     =/  tri  !<(trigger vase)
-    de-abet:(de-poke-trigger:(de-abed:de delegates) tri)
-    (emil cards)
-    ::
-      %emissary-action
-    =^  cards  state
-    =/  axn  !<(action vase)
-    pa-abet:(pa-poke-action:(pa-abed:pa patrons requests) axn)
+    ?-    -.tri
+        ?(%designate %revoke)
+      pa-abet:(pa-poke-trigger:(pa-abed:pa delegates) tri)
+        ?(%accept %reject)
+      de-abet:(de-poke-response:(de-abed:de patrons requests) tri)
+    ==
     (emil cards)
     ::
       %emissary-response
     =^  cards  state
     =/  res  !<(response vase)
-    pa-abet:(pa-poke-response:(pa-abed:pa patrons requests) res)
+    de-abet:(de-poke-response:(de-abed:de patrons requests) res)
     (emil cards)
     ::
       %handle-http-request
-    ::=/  req  !<(http-request vase)
     =;  out=(quip card _+.state)
       =.  +.state  +.out
       :: flop here so that the kick from rudder isn't first
       (emil (flop -.out))
     %.  [bol !<(order:rudder vase) +.state]
     %-  (steer:rudder _+.state trigger)
-    :^    patron-pages
-        (point:rudder /apps/[dap.bol] & ~(key by patron-pages))
+    :^    pages
+        (point:rudder /apps/[dap.bol] & ~(key by pages))
       (fours:rudder +.state)
     |=  tri=trigger
     ^-  $@(brief:rudder [brief:rudder (list card) _+.state])
     =.  that  (poke %emissary-trigger !>(tri))
-    ['Processed succesfully.' deck +.state]
-    :: TODO: branch on type of request (patron/delegate)
+    [%'' deck +.state]
   ==  ::  mark
-::  delegates core
-++  de
-  |_  $:  delegates=(map ship status)
-          caz=(list card)
-      ==
-  +*  de  .
-  ++  de-emit  |=(c=card de(caz [c caz]))
-  ++  de-emil  |=(lc=(list card) de(caz (welp lc caz)))
-  ++  de-abed
-    |=  [=(map ship status)]
-    de(delegates map)
-  ++  de-abet
-    ^-  (quip card _state)
-    [(flop caz) state(delegates delegates)]
-  ++  de-poke-trigger
-    |=  tri=trigger
-    ^+  de
-    ?-    -.tri
-        %designate
-      ?>  (is-supra our.bol ship.tri)
-      ?:  (~(has by delegates) ship.tri)
-        =/  status  (~(got by delegates) ship.tri)
-        ::  if valid, then don't do anything
-        ?:  =(%valid status)  de
-        ::  if rejected, then send again
-        ?:  =(%rejected status)
-          :: build cards
-          =.  delegates  (~(put by delegates) ship.tri %pending)
-          =/  new-cards
-            :~  [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-action !>([%designate ~])]
-                [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %watch /request]
-            ==
-          (de-emil new-cards)
-        ?>  =(%pending status)  de
-      =.  delegates  (~(put by delegates) ship.tri %pending)
-      =/  new-cards
-        :~  [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-action !>([%designate ~])]
-            [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %watch /request]
-        ==
-      (de-emil new-cards)
-    ::
-        %revoke
-      ?.  (~(has by delegates) ship.tri)  de
-      =.  delegates  (~(del by delegates) ship.tri)
-      =/  new-cards
-        :~  [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-action !>([%revoke our.bol])]
-            [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %leave ~]
-        ==
-      (de-emil new-cards)
-    ::
-    ==  ::  %emissary-action
-  --  ::  delegates core
-::
 ::  patrons core
 ++  pa
   |_  $:  patrons=(set ship)
+          delegates=(map ship status)
           requests=(set ship)
           caz=(list card)
       ==
@@ -249,66 +199,116 @@
   ++  pa-emit  |=(c=card pa(caz [c caz]))
   ++  pa-emil  |=(lc=(list card) pa(caz (welp lc caz)))
   ++  pa-abed
-    |=  [p=(set ship) r=(set ship)]
-    pa(patrons p, requests r)
+    |=  [=(map ship status)]
+    pa(delegates map)
   ++  pa-abet
     ^-  (quip card _state)
-    [(flop caz) state]
-  ++  pa-watch
-    |.
+    [(flop caz) state(delegates delegates)]
+  ++  pa-poke-trigger
+    |=  tri=trigger
     ^+  pa
-    ?:  (~(has in patrons) src.bol)
-      %-  pa-emil
-      :~  [%give %fact ~ %emissary-answer !>([%accept ~])]
+    ?+    -.tri  pa
+        %designate
+      ::?>  ~|(%cannot-designate-superior (is-supra our.bol ship.tri))
+      ?:  (~(has by delegates) ship.tri)
+        =/  status  (~(got by delegates) ship.tri)
+        ::  if valid, then don't do anything
+        ?:  =(%valid status)  pa
+        ::  if rejected, then send again
+        ?:  =(%rejected status)
+          :: build cards
+          =.  delegates  (~(put by delegates) ship.tri %pending)
+          =/  new-cards
+            :~  [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-response !>([%designate our.bol])]
+                [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %watch /request]
+            ==
+          (pa-emil new-cards)
+        ?>  =(%pending status)  pa
+      =.  delegates  (~(put by delegates) ship.tri %pending)
+      =/  new-cards
+        :~  [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-response !>([%designate our.bol])]
+            [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %watch /request]
+        ==
+      (pa-emil new-cards)
+    ::
+        %revoke
+      ?.  (~(has by delegates) ship.tri)  pa
+      =.  delegates  (~(del by delegates) ship.tri)
+      =/  new-cards
+        :~  [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-response !>([%revoke our.bol])]
+            [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %leave ~]
+        ==
+      (pa-emil new-cards)
+    ::
+    ==  ::  %emissary-response
+  --  ::  patrons core
+::
+::  delegates core
+++  de
+  |_  $:  patrons=(set ship)
+          delegates=(map ship status)
+          requests=(set ship)
+          caz=(list card)
       ==
-    pa
-  ++  pa-poke-action
-    |=  axn=action
-    ^+  pa
-    ?-    -.axn
+  +*  de  .
+  ++  de-emit  |=(c=card de(caz [c caz]))
+  ++  de-emil  |=(lc=(list card) de(caz (welp lc caz)))
+  ++  de-abed
+    |=  [p=(set ship) r=(set ship)]
+    de(patrons p, requests r)
+  ++  de-abet
+    ^-  (quip card _state)
+    [(flop caz) state]
+  ++  de-watch
+    |.
+    ^+  de
+    ?:  (~(has in patrons) src.bol)
+      %-  de-emil
+      :~  [%give %fact ~ %emissary-response !>([%accept ~])]
+      ==
+    de
+  ++  de-poke-response
+    |=  res=response
+    ^+  de
+    ?-    -.res  ::~|(%bad-poke-response !!)
         %designate
       ?:  (~(has in patrons) src.bol)
         =/  new-cards
-          :~  [%give %fact ~[/des/(scot %p our.bol)] %emissary-answer !>([%accept ~])]
+          :~  [%give %fact ~[/des/(scot %p our.bol)] %emissary-response !>([%accept ~])]
           ==
-        (pa-emil new-cards)
+        (de-emil new-cards)
       =.  requests  (~(put in requests) src.bol)
       :: TODO hark notification logic here
       =/  new-cards
-        ?.  .^(? %gu /(scot %p our.bol)/hark-store/(scot %da now.bol))  ~
+        ?.  .^(? %gu /(scot %p our.bol)/hark/(scot %da now.bol))  ~
         =/  con=(list content:hark)  [[%ship src.bol] 'Designation request received.' ~]
         =/  =id:hark      (end 7 (shas %emissary-trigger eny.bol))
         =/  =rope:hark    [~ ~ q.byk.bol /(scot %p src.bol)/[dap.bol]]
         =/  =action:hark  [%add-yarn & & id rope now.bol con /[dap.bol] ~]
         [%pass /hark %agent [our.bol %hark] %poke %hark-action !>(action)]~
-      (pa-emil new-cards)
+      (de-emil new-cards)
     ::
         %revoke
-      ?.  (~(has in patrons) src.bol)  (pa-emil ~)
+      ?.  (~(has in patrons) src.bol)  (de-emil ~)
       =.  patrons  (~(del in patrons) src.bol)
-      pa
+      de
     ::
-    ==  ::  %emissary-action
-  ++  pa-poke-response
-    |=  res=response
-    ^+  pa
-    ?-    -.res
         %accept
       =.  patrons  (~(put in patrons) ship.res)
       =.  requests  (~(del in requests) ship.res)
       =/  new-cards
-        :~  [%give %fact ~[/des/(scot %p our.bol)] %emissary-answer !>([%accept ~])]
+        :~  [%give %fact ~[/des/(scot %p our.bol)] %emissary-response !>([%accept ~])]
             [%give %kick ~[/des/(scot %p our.bol)] `src.bol]
         ==
-      (pa-emil new-cards)
+      (de-emil new-cards)
       ::
         %reject
       =.  requests  (~(del in requests) ship.res)
       =/  new-cards
-        :~  [%give %fact ~[/des/(scot %p our.bol)] %emissary-answer !>([%reject ~])]
+        :~  [%give %fact ~[/des/(scot %p our.bol)] %emissary-response !>([%reject ~])]
             [%give %kick ~[/des/(scot %p our.bol)] `src.bol]
         ==
-      (pa-emil new-cards)
+      (de-emil new-cards)
     ==  ::  %emissary-response
-  --  ::  patrons core
+  --  ::  delegates core
 --

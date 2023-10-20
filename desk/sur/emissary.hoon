@@ -6,36 +6,32 @@
 +$  rank  ?(%galaxy %star %planet %moon %comet)
 ::
 ::  trigger = on star, start action to inferior point
+::            on planet, confirmation or rejection of delegation
 +$  trigger
   $%  [%designate =ship]
       [%revoke =ship]
+      [%accept =ship]
+      [%reject =ship]
   ==
-::  action = superior point to inferior point
-+$  action
-  $%  [%designate ~]
-      [%revoke ~]
-  ==
-::  response = confirmation or rejection from poke or front-end
+::  response = answer
 +$  response
-    $%  [%accept =ship]
-        [%reject =ship]
-    ==
-::  answer = confirmation/acknowledgement
-+$  answer
-  $%  [%accept ~]
-      [%reject ~]
+  $%  [%designate =ship]
+      [%revoke =ship]
+      [%accept =ship]
+      [%reject =ship]
   ==
 ::  status = current state of designation
 +$  status
   $?  %pending
       %valid
       %rejected
-      ::%revoked
+      ::%revoked  ::  XX nice to have
   ==
 ::  demand scries
 +$  demand
   $%  [%delegates p=(set ship)]
       [%patrons p=(set ship)]
+      [%requests p=(set ship)]
       [%delegate p=?]
       [%patron p=?]
   ==

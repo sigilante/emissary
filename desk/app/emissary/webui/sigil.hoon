@@ -1,9 +1,9 @@
-::  pals mutual icon
+::  pals mutual icon, ripped off gleefully for %emissary
 ::
-/-  *pals
+/-  *emissary
 /+  rudder, sigil
 ::
-^-  (page:rudder records command)
+^-  (page:rudder [(set ship) (map ship status) (set ship)] [trigger])
 |_  [=bowl:gall * *]
 ++  argue  !!
 ++  final  !!
