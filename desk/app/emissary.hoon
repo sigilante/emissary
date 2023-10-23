@@ -114,8 +114,8 @@
 ++  agent
   |=  [wire=(pole knot) =sign:agent:gall]
   ^+  that
-  ?+    wire  ~|(%unknown-wire !!)
-      [%des id=@ ~]
+  ?+    wire  ~&([dap.bol %strange-wire wire] that)
+      [%emissary id=@ ~]
     =/  ship  (need (slaw %p id.wire))
     ?-    -.sign
         %kick
@@ -142,6 +142,11 @@
       %-  (slog tank u.p.sign)
       that
     ==  ::  sign
+    ::
+      [%hark ~]
+    ?.  ?=(%poke-ack -.sign)  ~&([dap.bol %strange-sign sign] that)
+    ?~  p.sign  that
+    ((slog '%emissary: failed to notify' u.p.sign) that)
   ==  ::  wire
 ::
 ++  arvo
@@ -219,15 +224,15 @@
           :: build cards
           =.  delegates  (~(put by delegates) ship.tri %pending)
           =/  new-cards
-            :~  [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-response !>([%designate our.bol])]
-                [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %watch /request]
+            :~  [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-response !>([%designate our.bol])]
+                [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %watch /request]
             ==
           (pa-emil new-cards)
         ?>  =(%pending status)  pa
       =.  delegates  (~(put by delegates) ship.tri %pending)
       =/  new-cards
-        :~  [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-response !>([%designate our.bol])]
-            [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %watch /request]
+        :~  [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-response !>([%designate our.bol])]
+            [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %watch /request]
         ==
       (pa-emil new-cards)
     ::
@@ -235,8 +240,8 @@
       ?.  (~(has by delegates) ship.tri)  pa
       =.  delegates  (~(del by delegates) ship.tri)
       =/  new-cards
-        :~  [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-response !>([%revoke our.bol])]
-            [%pass /des/(scot %p ship.tri) %agent [ship.tri %emissary] %leave ~]
+        :~  [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-response !>([%revoke our.bol])]
+            [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %leave ~]
         ==
       (pa-emil new-cards)
     ::
@@ -274,13 +279,12 @@
         %designate
       ?:  (~(has in patrons) src.bol)
         =/  new-cards
-          :~  [%give %fact ~[/des/(scot %p our.bol)] %emissary-response !>([%accept ~])]
+          :~  [%give %fact ~[/emissary/(scot %p our.bol)] %emissary-response !>([%accept ~])]
           ==
         (de-emil new-cards)
       =.  requests  (~(put in requests) src.bol)
-      :: TODO hark notification logic here
       =/  new-cards
-        ?.  .^(? %gu /(scot %p our.bol)/hark/(scot %da now.bol))  ~
+        ?.  .^(? %gu /(scot %p our.bol)/hark/(scot %da now.bol)/$)  ~
         =/  con=(list content:hark)  [[%ship src.bol] 'Designation request received.' ~]
         =/  =id:hark      (end 7 (shas %emissary-trigger eny.bol))
         =/  =rope:hark    [~ ~ q.byk.bol /(scot %p src.bol)/[dap.bol]]
@@ -297,16 +301,16 @@
       =.  patrons  (~(put in patrons) ship.res)
       =.  requests  (~(del in requests) ship.res)
       =/  new-cards
-        :~  [%give %fact ~[/des/(scot %p our.bol)] %emissary-response !>([%accept ~])]
-            [%give %kick ~[/des/(scot %p our.bol)] `src.bol]
+        :~  [%give %fact ~[/emissary/(scot %p our.bol)] %emissary-response !>([%accept ~])]
+            [%give %kick ~[/emissary/(scot %p our.bol)] `src.bol]
         ==
       (de-emil new-cards)
       ::
         %reject
       =.  requests  (~(del in requests) ship.res)
       =/  new-cards
-        :~  [%give %fact ~[/des/(scot %p our.bol)] %emissary-response !>([%reject ~])]
-            [%give %kick ~[/des/(scot %p our.bol)] `src.bol]
+        :~  [%give %fact ~[/emissary/(scot %p our.bol)] %emissary-response !>([%reject ~])]
+            [%give %kick ~[/emissary/(scot %p our.bol)] `src.bol]
         ==
       (de-emil new-cards)
     ==  ::  %emissary-response
