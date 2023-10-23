@@ -108,6 +108,14 @@
     button {
       padding: 0.2em 0.5em;
     }
+
+    .index-btn {
+      background-color: #222299;
+      border-radius: 5px;
+      color: white;
+      padding: 15px 32px;
+      display: inline-block;
+    }
     '''
   ::
   ++  page
@@ -129,48 +137,17 @@
         This delegate portal allows you to review, accept, or reject delegation
         to you from a star.
 
+        ;a(href "/apps/emissary/index", class "index-btn"):"back to index"
+
         Your current patrons are:
 
-        ;table#pals
-          ;form(method "post")
-            ;tr(style "font-weight: bold")
-              ;td:"sigil"
-              ;td:"@p"
-              ;td:"action"
-            ==
-            ;tr
-              ;td:""
-              ;td
-                ;input(type "text", name "who", placeholder "~sampel-palnet");
-              ==
-              ;td
-                ;button(type "submit", name "what", value "reject"):"✗"
-              ==
-            ==
-          ==
+        ;table
           ;*  patronizeds
         ==
 
         Your outstanding requests are:
 
-        ;table#pals
-          ;form(method "post")
-            ;tr(style "font-weight: bold")
-              ;td:"sigil"
-              ;td:"@p"
-              ;td:"action"
-            ==
-            ;tr
-              ;td:""
-              ;td
-                ;input(type "text", name "who", placeholder "~sampel-palnet");
-              ==
-              ;td
-                ;button(type "submit", name "what", value "accept"):"✓"
-                ;button(type "submit", name "what", value "reject"):"✗"
-              ==
-            ==
-          ==
+        ;table
           ;*  awaiteds
         ==
       ==
@@ -242,7 +219,7 @@
   ++  sigil
     |=  =ship
     ^-  manx
-    =/  bg=@ux  (cut 2 [1 6] eny.bowl)
+    =/  bg=@ux  (cut 2 [1 6] (add ship eny.bowl))
     =/  fg=tape
       =+  avg=(div (roll (rip 3 bg) add) 3)
       ?:((gth avg 0xc1) "black" "white")

@@ -1,12 +1,12 @@
 /-  emissary
-|_  sta=status:emissary
+|_  dem=demand:emissary
 ++  grab
   |%
-  ++  noun  status:emissary
+  ++  noun  demand:emissary
   --
 ++  grow
   |%
-  ++  noun  sta
+  ++  noun  dem
   --
 ++  grad  %noun
 --

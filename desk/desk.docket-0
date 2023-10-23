@@ -1,10 +1,9 @@
 :~  title+'%emissary'
-    info+'A star designates a planet as its representative.'
-    color+0x12.3456
-    image+'https://hanfel-dovned.sfo3.digitaloceanspaces.com/bless-icon.png'
-    ::base+'emissary'
+    info+'A point designates another as its delegated representative.'
+    color+0x64.5050
+    image+'https://raw.githubusercontent.com/sigilante/emissary/master/emissary-icon.png'
     site+/apps/emissary
-    version+[0 0 1]
+    version+[1 0 0]
     website+'https://urbit.org'
     license+'MIT'
 ==

@@ -1,12 +1,12 @@
 /-  emissary
-|_  sta=status:emissary
+|_  tri=trigger:emissary
 ++  grab
   |%
-  ++  noun  status:emissary
+  ++  noun  trigger:emissary
   --
 ++  grow
   |%
-  ++  noun  sta
+  ++  noun  tri
   --
 ++  grad  %noun
 --

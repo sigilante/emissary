@@ -1,8 +1,60 @@
 #   `%emissary`
 
-`%emissary` allows a star to designate a planet as its representative.  This is tied to an operational star, not to ownership on Azimuth.
+`%emissary` allows a running star to designate a planet as its representative.  (This is tied to operation not merely to ownership.)
 
-Ultimately, `%emissary` should allow app developers to permit emissary planets to exercise star-related powers and privileges.
+`%emissary` allows app developers to permit delegate planets to exercise star-related powers and privileges.  It can be used for arrangements beyond this, however.
+
+Prior art:
+
+- [`~hanfel-dovned/bless`](https://github.com/hanfel-dovned/Bless)
+- [`~paldev/pals`](https://github.com/fang-/suite/)
+
+
+##  Interface
+
+The index page is served at `/app/emissary`.
+
+### Patron
+
+The patron is responsible to send a request to another point for that point to act as its delegate.
+
+Delegation may be managed through the patron portal online or using CLI generators:
+
+```hoon
+:emissary|designate ~sampel-palnet
+:emissary|revoke ~sampel-palnet
+```
+
+![](./img/screenshot-patron.png)
+
+### Delegate
+
+The delegate may review and either accept or reject requests from other points to serve as their delegate.
+
+Delegation may be managed through the delegate portal online or using CLI generators:
+
+```hoon
+:emissary|accept ~sampel
+:emissary|reject ~sampel
+```
+
+![](./img/screenshot-delegate.png)
+
+### Third-Party App
+
+At the current time, a third-party app should check the claim and agreement of a patron and a delegate through scries.
+
+```hoon
+.^((set @p) %gy /=emissary=/delegates)
+.^((set @p) %gy /=emissary=/requests)
+.^((set @p) %gy /=emissary=/patrons)
+
+.^(? %gx /=emissary=/delegate/~zod/noun)
+.^(? %gx /=emissary=/patron/~zod/noun)
+```
+
+We need to decide what is a good interval for this attestation to remain valid.  We also need to produce a library core to facilitate checking both points easily.
+
 
 ##  Specification
 
@@ -12,33 +64,7 @@ User story:
 2. The planet operator (same person presumably) can then make a claim on their ship at an endpoint or scry path or whatever that they have the designation from a star.
 3. A third-party app should check both the planet claim and the star claim, which requires the star to be online.
 
-So there is one agents in `%emissary` that carries out two roles:
+So there is one agent in `%emissary` that carries out two roles:
 
-1. Designator (for the star)
-2. Testator (for the planet)
-
-
-##  Worklist
-
-- [x] spec out project scope
-  - do we want to use the `++abet` pattern?
-    - https://github.com/sigilante/rkyv
-- [x] look at `%bless`
-  - https://github.com/hanfel-dovned/Bless
-- [x] set up repo and MWE agent
-  - ++on-init, ++on-load, ++on-save
-  - ++on-peek, ++on-poke
-  - ++on-watch, ++on-leave
-    - https://github.com/niblyx-malnus/venter-pattern/
-  - ++on-arvo, ++on-fail
-  - ++on-agent
-- [x] restrict asset classes
-- [~] test and validate behavior
-- [x] add generators to wrap pokes
-  - :emissary|designate ~lagrev-nocfep   :: on star
-- [x] add a Sail/Rudder front-end
-  - [x] patron-side management
-  - [x] delegate-side management
-  - [ ] return to proper page w/o redirecting to index
-- [ ] make a library for 3rd-party developers to use
-- [~] add hark notifications (check syntax of %pass)
+1. Patron (nominally for the star or superior point)
+2. Delegate (nominally for the planet or inferior point)
