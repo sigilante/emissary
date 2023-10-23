@@ -4,6 +4,8 @@
 
 `%emissary` allows app developers to permit delegate planets to exercise star-related powers and privileges.  It can be used for arrangements beyond this, however.
 
+![](https://raw.githubusercontent.com/sigilante/emissary/master/img/emissary-icon.png)
+
 Prior art:
 
 - [`~hanfel-dovned/bless`](https://github.com/hanfel-dovned/Bless)
