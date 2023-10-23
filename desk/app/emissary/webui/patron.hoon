@@ -23,7 +23,7 @@
     [%revoke u.who]
   ==
 ::
-++  final  (alert:rudder (cat 3 '/apps/' dap.bowl) build)
+++  final  (alert:rudder :((cury cat 3) '/apps/' dap.bowl '/patron') build)
 ::
 ++  build
   |=  $:  arg=(list [k=@t v=@t])
