@@ -127,9 +127,15 @@
       ~&  >  [p.cage.sign our.bol src.bol]
       =/  ans  !<(response q.cage.sign)
       ?:  =(%accept -.ans)
-        that(delegates (~(put by delegates) ship %valid))
+        =^  cards  state
+          pa-abet:(pa-agent:(pa-abed:pa delegates) ans)
+        (emil cards)
+        ::that(delegates (~(put by delegates) ship %valid))
       ?>  =(%reject -.ans)
-      that(delegates (~(put by delegates) ship %rejected))
+      =^  cards  state
+        pa-abet:(pa-agent:(pa-abed:pa delegates) ans)
+      (emil cards)
+      ::that(delegates (~(put by delegates) ship %rejected))
       ::
         %poke-ack
       ?~  p.sign
@@ -253,6 +259,25 @@
       (pa-emil new-cards)
     ::
     ==  ::  %emissary-response
+  ++  pa-agent
+    |=  ans=response
+    ?+    -.ans  ~|(%invalid-response-shouldnt-happen pa)
+        %accept
+      =.  delegates  (~(put by delegates) ship.ans %valid)
+      =/  new-cards
+        :~  [%pass /emissary/fine %grow /delegate/(scot %p ship.ans) noun+%.y]
+            [%pass /emissary/fine %grow /delegates noun+delegates]
+        ==
+      (pa-emil new-cards)
+      ::
+        %reject
+      =.  delegates  (~(put by delegates) ship.ans %rejected)
+      =/  new-cards
+        :~  [%pass /emissary/fine %grow /delegate/(scot %p ship.ans) noun+%.n]
+            [%pass /emissary/fine %grow /delegates noun+delegates]
+        ==
+      (pa-emil new-cards)
+    ==  ::  %emissary-response
   --  ::  patrons core
 ::
 ::  delegates core
@@ -277,6 +302,8 @@
     ?:  (~(has in patrons) src.bol)
       %-  de-emil
       :~  [%give %fact ~ %emissary-response !>([%accept ~])]
+          [%pass /emissary/fine %grow /patron/(scot %p src.bol) noun+%.y]
+          [%pass /emissary/fine %grow /patrons noun+patrons]
       ==
     de
   ++  de-poke
@@ -288,10 +315,11 @@
       ?:  (~(has in patrons) src.bol)
         =/  new-cards
           :~  [%give %fact ~[/request] %emissary-response !>([%accept ~])]
+              [%pass /emissary/fine %grow /patron/(scot %p src.bol) noun+%.y]
+              [%pass /emissary/fine %grow /patrons noun+patrons]
           ==
         (de-emil new-cards)
       =.  requests  (~(put in requests) src.bol)
-      ~&  >>>  requests
       =/  new-cards
         ?.  .^(? %gu /(scot %p our.bol)/hark/(scot %da now.bol)/$)  ~
         =/  con=(list content:hark)  [[%ship src.bol] 'Designation request received.' ~]
@@ -299,6 +327,7 @@
         =/  =rope:hark    [~ ~ q.byk.bol /(scot %p src.bol)/[dap.bol]]
         =/  =action:hark  [%add-yarn & & id rope now.bol con /[dap.bol] ~]
         :~  [%pass /hark %agent [our.bol %hark] %poke %hark-action !>(action)]
+            [%pass /emissary/fine %grow /requests noun+requests]
         ==
       (de-emil new-cards)
     ::

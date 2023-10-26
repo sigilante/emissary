@@ -44,18 +44,47 @@ Delegation may be managed through the delegate portal online or using CLI genera
 
 ### Third-Party App
 
-At the current time, a third-party app should check the claim and agreement of a patron and a delegate through scries.
+At the current time, a local third-party app should check the claim and agreement of a patron and a delegate through local scries.
 
 ```hoon
 .^((set @p) %gy /=emissary=/delegates)
 .^((set @p) %gy /=emissary=/requests)
 .^((set @p) %gy /=emissary=/patrons)
 
-.^(? %gx /=emissary=/delegate/~zod/noun)
-.^(? %gx /=emissary=/patron/~zod/noun)
+.^(? %gx /=emissary=/delegate/~sampel-palnet/noun)
+.^(? %gx /=emissary=/patron/~sampel-palnet/noun)
 ```
 
-We need to decide what is a good interval for this attestation to remain valid.  We also need to produce a library core to facilitate checking both points easily.
+A remote app should check the claim and agreement of a patron and a delegate through remote scries.  (Presumably at least one of the checks is always remote.)  The following scry endpoints are bound (with appropriate revision number and the same types as above):
+
+```hoon
+/g/x/0/emissary//delegates
+/g/x/0/emissary//requests
+/g/x/0/emissary//patrons
+
+/g/x/0/emissary//delegate/~sampel-palnet
+/g/x/0/emissary//patron/~sampel-palnet
+```
+
+You can request one of these values at the current time using a remote scry `%keen` task (without the double `//`):
+
+```hoon
+[%pass /emissary/fine %arvo %a %keen ~sampel-palnet /g/x/0/emissary/delegate/~sampel]
+```
+
+which will return a `%tune` gift of the form:
+
+```hoon
+[%tune [~sampel-palnet /emissary/fine] `roar]
+```
+
+The `+$roar` will contain the remote scry path and the value in its head.  (The tail is the signature.)  That head:
+
+```hoon
+[/g/x/0/emissary/delegate/~sampel [~ %.y]]
+```
+
+A third-party agent should be careful to use the latest revision of the delegation.  We need to decide what is a good interval for this attestation to remain valid (i.e. if a star is taken offline).  We also need to produce a library core to facilitate checking both points easily.
 
 
 ##  Specification
@@ -70,3 +99,9 @@ So there is one agent in `%emissary` that carries out two roles:
 
 1. Patron (nominally for the star or superior point)
 2. Delegate (nominally for the planet or inferior point)
+
+
+##  Changelog
+
+- `[1 0 0]` initial release
+- `[1 1 0]` added support for remote scry
