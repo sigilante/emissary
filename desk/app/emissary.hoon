@@ -2,13 +2,13 @@
 /+  default-agent, dbug, *emissary, rudder
 ::
 /~  pages
-    (page:rudder [(set ship) (map ship status) (set ship)] [?(trigger decide)])
+    (page:rudder [(set ship) (map ship status) (set ship) (map query quest)] ?(trigger decide query))
     /app/emissary/webui
 ::
 |%
 +$  versioned-state
   $%  state-zero
-      ::state-one
+      state-one
   ==
 +$  state-zero
   $:  %zero
@@ -16,17 +16,17 @@
       delegates=(map ship status)
       requests=(set ship)
   ==
-::
-::  $:  %one
-::      patron=(set ship)
-::      delegates=(map ship status)
-::      requests=(set ship)
-::      queries=(set ship)
-::  ==
++$  state-one
+  $:  %one
+      patrons=(set ship)
+      delegates=(map ship status)
+      requests=(set ship)
+      queries=(map query quest)
+  ==
 +$  card  card:agent:gall
 --
 %-  agent:dbug
-=|  state-zero
+=|  state-one
 =*  state  -
 ^-  agent:gall
 =<
@@ -86,6 +86,7 @@
   :~  [%pass /eyre/connect %arvo %e %connect [~ /apps/[dap.bol]] dap.bol]
       [%pass /eyre/connect %arvo %e %connect [~ /apps/[dap.bol]/patron] dap.bol]
       [%pass /eyre/connect %arvo %e %connect [~ /apps/[dap.bol]/delegate] dap.bol]
+      [%pass /eyre/connect %arvo %e %connect [~ /apps/[dap.bol]/observer] dap.bol]
   ==
 ::
 ++  init
@@ -93,10 +94,15 @@
   (emil connect)
 ::
 ++  load
-  |=  vaz=vase
+  |=  =old=vase
   ^+  that
-  ?>  ?=([%zero *] q.vaz)
-  that(state !<(state-zero vaz))
+  =/  old  !<(versioned-state old-vase)
+  ?-    -.old
+      %zero
+    that(state [%one patrons.old delegates.old requests.old *(map query quest)])
+      %one
+    that(state old)
+  ==
 ::
 ++  peek
   |=  pol=(pole knot)
@@ -185,36 +191,36 @@
   ^+  that
   ?+    mark  ~|(%invalid-poke that)
       %emissary-trigger
-    ::  from UI
     =^  cards  state
       =/  tri  !<(trigger vase)
+      ::  from UI
       ?>  =(our.bol src.bol)
       pa-abet:(pa-poke-trigger:(pa-abed:pa delegates) tri)
     (emil cards)
     ::
       %emissary-request
-    ::  over the wire
     =^  cards  state
       =/  req  !<(request vase)
+      ::  over the wire
       ?>  !=(our.bol src.bol)
       de-abet:(de-poke-request:(de-abed:de patrons requests) req src.bol)
     (emil cards)
     ::
       %emissary-decide
-    ::  from UI
     =^  cards  state
       =/  dec  !<(decide vase)
+      ::  from UI
       ?>  =(our.bol src.bol)
       de-abet:(de-poke-decide:(de-abed:de patrons requests) dec)
     (emil cards)
-    ::  XXX TODO REMOVEME
-    ::  %emissary-response
-    ::::  over the wire
-    ::=^  cards  state
-    ::  =/  res  !<(response vase)
-    ::  ?>  !=(our.bol src.bol)
-    ::  pa-abet:(pa-poke-response:(pa-abed:pa delegates) res src.bol)
-    ::(emil cards)
+    ::
+      %emissary-query
+    =^  cards  state
+      =/  que  !<(query vase)
+      ::  from UI
+      ?>  =(our.bol src.bol)
+      ob-abet:(ob-poke-query:(ob-abed:ob queries) que)
+    (emil cards)
     ::
       %handle-http-request
     =;  out=(quip card _+.state)
@@ -222,14 +228,14 @@
       :: flop here so that the kick from rudder isn't first
       (emil (flop -.out))
     %.  [bol !<(order:rudder vase) +.state]
-    ::  XXX the following is pretty nasty to satisfy /lib/rudder restrictions
-    %-  (steer:rudder _+.state ?(trigger decide))
+    %-  (steer:rudder _+.state ?(trigger decide query))
     :^    pages
         (point:rudder /apps/[dap.bol] & ~(key by pages))
       (fours:rudder +.state)
-    |=  val=?(trigger decide)
+    |=  val=?(trigger decide query)
     ^-  $@(brief:rudder [brief:rudder (list card) _+.state])
-    ?-    -.val
+    ::  XXX the following is pretty nasty to satisfy /lib/rudder restrictions
+    ?-    -.val  ::~|(%unexpected-query-from-frontend !!)
         %designate
       =.  that  (poke %emissary-trigger !>(`trigger`[%designate +.val]))
       [%'' deck +.state]
@@ -242,6 +248,12 @@
         %reject
       =.  that  (poke %emissary-decide !>(`decide`[%reject +.val]))
       [%'' deck +.state]
+        %patron
+      =.  that  (poke %emissary-query !>(`query`[%patron +.val]))
+      [%'' deck +.state]
+        %delegate
+      =.  that  (poke %emissary-query !>(`query`[%delegate +.val]))
+      [%'' deck +.state]
     ==
   ==  ::  mark
 ::  patrons core
@@ -249,6 +261,7 @@
   |_  $:  patrons=(set ship)
           delegates=(map ship status)
           requests=(set ship)
+          queries=(map query quest)
           deck=(list card)
       ==
   +*  pa  .
@@ -329,6 +342,7 @@
   |_  $:  patrons=(set ship)
           delegates=(map ship status)
           requests=(set ship)
+          queries=(map query quest)
           deck=(list card)
       ==
   +*  de  .
@@ -423,4 +437,40 @@
       (de-emil (flop new-cards))
     ==  ::  %emissary-response
   --  ::  delegates core
+::
+::  observer core
+++  ob
+  |_  $:  patrons=(set ship)
+          delegates=(map ship status)
+          requests=(set ship)
+          queries=(map query quest)
+          deck=(list card)
+      ==
+  +*  ob  .
+  ++  ob-emit  |=(c=card ob(deck [c deck]))
+  ++  ob-emil  |=(lc=(list card) ob(deck (welp lc deck)))
+  ++  ob-abed
+    |=  =(map query quest)
+    ob(queries map)
+  ++  ob-abet
+    ^-  (quip card _state)
+    [(flop deck) state(queries queries)]
+  ++  ob-poke-query
+    |=  que=query
+    ^+  ob
+    =.  queries  (~(put by queries) que *quest)
+    ?-    -.que
+        %patron
+      =/  new-cards
+        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary/patrons]
+        ==
+      (ob-emil new-cards)
+      ::
+        %delegate
+      =/  new-cards
+        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary/delegates]
+        ==
+      (ob-emil new-cards)
+    ==  ::  %emissary-query
+  --  ::  observer core
 --

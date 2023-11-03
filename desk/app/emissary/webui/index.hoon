@@ -4,8 +4,8 @@
 /-  *emissary
 /+  rudder, sigil-svg=sigil
 ::
-^-  (page:rudder [(set ship) (map ship status) (set ship)] [?(trigger decide)])
-|_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship)]]
+^-  (page:rudder [(set ship) (map ship status) (set ship) (map query quest)] ?(trigger decide query))
+|_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship) queries=(map query quest)]]
 ++  argue  !!
 ++  final  !!
 ::
@@ -15,8 +15,6 @@
       ==
   ^-  reply:rudder
   |^  [%page page]
-  ::
-  ++  icon-color  "black"
   ::
   ++  style
     '''
@@ -109,6 +107,14 @@
       padding: 15px 32px;
       display: inline-block;
     }
+
+    .observer-btn {
+      background-color: #dddd22;
+      border-radius: 5px;
+      color: white;
+      padding: 15px 32px;
+      display: inline-block;
+    }
     '''
   ::
   ++  page
@@ -123,71 +129,26 @@
       ;body
         ;h1:"%emissary"
 
-        `%emissary` allows a star to designate a planet as its representative.
-        This is tied to an operating star, not to ownership on Azimuth.
+        ;+  (sigil our.bowl)
 
-        Are you acting as a patron or a delegate from this point today?
+        `%emissary` allows a running star to designate a planet as its
+        representative.  (This is tied to operation not merely to ownership.)
+
+        `%emissary` allows app developers to permit delegate planets to
+        exercise star-related powers and privileges.
+
+        ;img(src "https://raw.githubusercontent.com/sigilante/emissary/master/img/emissary-icon.png");
+
+        In which role are you acting today?
 
         ;a(href "/apps/emissary/patron", class "patron-btn"):"patron"
         ;a(href "/apps/emissary/delegate", class "delegate-btn"):"delegate"
+        ;a(href "/apps/emissary/observer", class "observer-btn"):"observer"
+
+        For more information, please visit the repo at
+        ;a(href "https://github.com/sigilante/emissary"):"sigilante/emissary"
       ==
     ==
-  ::
-  ++  revoker
-    |=  =ship
-    ^-  manx
-    ;form(method "post")
-      ;input(type "hidden", name "who", value "{(scow %p ship)}");
-      ;button(type "submit", name "what", value "revoke"):"×"
-    ==
-  ::
-  ++  peers
-    |=  [=status pez=(list [ship status])]
-    ^-  (list manx)
-    %+  turn  pez
-    |=  [=ship =^status]
-    ^-  manx
-    ;tr
-      ;td
-        ;+  (sigil ship)
-      ==
-      ;td
-        ; {(scow %p ship)}
-      ==
-      ;+  ?:  ?=(%valid status)
-            ;td
-              ;+  (revoker ship)
-            ==
-          ?:  ?=(%pending status)
-            ;td
-              ;+  (revoker ship)
-            ==
-          ?>  ?=(%rejected status)
-          ;td
-            ;p.red:"rejected"
-          ==
-    ==
-  ::
-  ++  valids
-    ^-  (list manx)
-    %+  peers  %valid
-    %+  skim  (sort ~(tap by delegates) dor)
-    |=  [=ship =status]
-    ?:(=(%valid status) & |)
-  ::
-  ++  pendings
-    ^-  (list manx)
-    %+  peers  %pending
-    %+  skim  (sort ~(tap by delegates) dor)
-    |=  [=ship =status]
-    ?:(=(%pending status) & |)
-  ::
-  ++  rejecteds
-    ^-  (list manx)
-    %+  peers  %rejected
-    %+  skim  (sort ~(tap by delegates) dor)
-    |=  [=ship =status]
-    ?:(=(%rejected status) & |)
   ::
   ++  sigil
     |=  =ship
@@ -198,8 +159,8 @@
       ?:((gth avg 0xc1) "black" "white")
     =/  bg=tape
       ((x-co:co 6) bg)
-    ;div.sigil(style "background-color: #{bg}; width: 40px; height: 40px;")
-      ;img@"/apps/emissary/sigil.svg?p={(scow %p ship)}&fg={fg}&bg=%23{bg}&icon&size=40";
+    ;div.sigil(style "background-color: #{bg}; width: 128px; height: 128px;")
+      ;img@"/apps/emissary/sigil.svg?p={(scow %p ship)}&fg={fg}&bg=%23{bg}&icon&size=128";
     ==
   ::
   --

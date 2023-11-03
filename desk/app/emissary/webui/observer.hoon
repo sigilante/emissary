@@ -1,4 +1,4 @@
-  ::  %emissary patron home page
+  ::  %emissary observer home page
 ::::
 ::
 /-  *emissary
@@ -8,7 +8,7 @@
 |_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship) queries=(map query quest)]]
 ++  argue
   |=  [headers=header-list:http body=(unit octs)]
-  ^-  $@(brief:rudder trigger)
+  ^-  $@(brief:rudder query)
   =/  args=(map @t @t)
     ?~(body ~ (frisk:rudder q.u.body))
   ?~  what=(~(get by args) 'what')
@@ -16,14 +16,14 @@
   ?~  who=(slaw %p (~(gut by args) 'who' ''))
     ~
   ?+    u.what  ~
-      %designate
-    [%designate u.who]
+      %patrons
+    [%patron u.who]
     ::
-      %revoke
-    [%revoke u.who]
+      %delegates
+    [%delegate u.who]
   ==
 ::
-++  final  (alert:rudder :((cury cat 3) '/apps/' dap.bowl '/patron') build)
+++  final  (alert:rudder :((cury cat 3) '/apps/' dap.bowl '/observer') build)
 ::
 ++  build
   |=  $:  arg=(list [k=@t v=@t])
@@ -127,13 +127,13 @@
       ==
       ;body
         ;h1:"%emissary"
-        ;h2:"patron portal"
+        ;h2:"observer portal"
 
         `%emissary` allows a star to designate a planet as its representative.
         This is tied to an operating star, not to ownership on Azimuth.
 
-        This patron portal allows you to send or revoke permissions to an
-        emissary.
+        This observer portal allows you to query the status of a patron or a
+        delegate.
 
         ;a(href "/apps/emissary/index", class "index-btn"):"back to index"
 
@@ -150,7 +150,10 @@
                 ;input(type "text", name "who", placeholder "~sampel-palnet");
               ==
               ;td
-                ;button(type "submit", name "what", value "designate"):"»"
+                ;button(type "submit", name "what", value "patrons"):"patrons?"
+              ==
+              ;td
+                ;button(type "submit", name "what", value "delegates"):"delegates?"
               ==
             ==
           ==

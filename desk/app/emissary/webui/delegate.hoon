@@ -4,8 +4,8 @@
 /-  *emissary
 /+  rudder, sigil-svg=sigil
 ::
-^-  (page:rudder [(set ship) (map ship status) (set ship)] [?(trigger decide)])
-|_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship)]]
+^-  (page:rudder [(set ship) (map ship status) (set ship) (map query quest)] ?(trigger decide query))
+|_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship) queries=(map query quest)]]
 ++  argue
   |=  [headers=header-list:http body=(unit octs)]
   ^-  $@(brief:rudder decide)
@@ -31,8 +31,6 @@
       ==
   ^-  reply:rudder
   |^  [%page page]
-  ::
-  ++  icon-color  "black"
   ::
   ++  style
     '''
@@ -110,7 +108,7 @@
     }
 
     .index-btn {
-      background-color: #222299;
+      background-color: #2222dd;
       border-radius: 5px;
       color: white;
       padding: 15px 32px;

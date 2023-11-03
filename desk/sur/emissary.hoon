@@ -24,6 +24,7 @@
   $?  %pending
       %valid
       %rejected
+      %unknown    ::  for query/quest
       ::%revoked  ::  XX nice to have
   ==
 ::  demand scries
@@ -35,4 +36,8 @@
       [%delegate p=?]
       [%patron p=?]
   ==
+::  queries
++$  kind  ?(%patron %delegate)
++$  query  [=kind =ship]
++$  quest  [=status timestamp=@da]
 --
