@@ -4,7 +4,7 @@
 /-  *emissary
 /+  rudder, sigil-svg=sigil
 ::
-^-  (page:rudder [(set ship) (map ship status) (set ship)] [trigger])
+^-  (page:rudder [(set ship) (map ship status) (set ship)] [?(trigger decide)])
 |_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship)]]
 ++  argue  !!
 ++  final  !!

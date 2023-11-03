@@ -4,11 +4,11 @@
 /-  *emissary
 /+  rudder, sigil-svg=sigil
 ::
-^-  (page:rudder [(set ship) (map ship status) (set ship)] [trigger])
+^-  (page:rudder [(set ship) (map ship status) (set ship)] [?(trigger decide)])
 |_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship)]]
 ++  argue
   |=  [headers=header-list:http body=(unit octs)]
-  ^-  $@(brief:rudder trigger)
+  ^-  $@(brief:rudder decide)
   =/  args=(map @t @t)
     ?~(body ~ (frisk:rudder q.u.body))
   ?~  what=(~(get by args) 'what')

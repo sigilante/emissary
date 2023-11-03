@@ -5,21 +5,20 @@
 |%
 +$  rank  ?(%galaxy %star %planet %moon %comet)
 ::
-::  trigger = on star, start action to inferior point
-::            on planet, confirmation or rejection of delegation
+::  trigger = patron requests or revokes delegation
 +$  trigger
   $%  [%designate =ship]
       [%revoke =ship]
-      [%accept =ship]
+  ==
+::  request = over-the-wire request to a particular ship
++$  request  ?(%designate %revoke)
+::  decide = delegate confirms or rejects delegation
++$  decide
+  $%  [%accept =ship]
       [%reject =ship]
   ==
 ::  response = answer
-+$  response
-  $%  [%designate =ship]
-      [%revoke =ship]
-      [%accept =ship]
-      [%reject =ship]
-  ==
++$  response  ?(%accept %reject)
 ::  status = current state of designation
 +$  status
   $?  %pending
@@ -31,7 +30,8 @@
 +$  demand
   $%  [%delegates p=(set ship)]
       [%patrons p=(set ship)]
-      [%requests p=(set ship)]
+      [%outgoing p=(set ship)]
+      [%incoming p=(set ship)]
       [%delegate p=?]
       [%patron p=?]
   ==

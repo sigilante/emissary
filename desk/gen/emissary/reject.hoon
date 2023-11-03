@@ -5,4 +5,4 @@
         [who=ship ~]
         ~
     ==
-[%emissary-response [%reject who]]
+[%emissary-decide [%reject who]]
