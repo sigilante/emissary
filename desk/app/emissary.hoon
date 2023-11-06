@@ -152,11 +152,6 @@
         =^  cards  state
           pa-abet:(pa-agent-response:(pa-abed:pa delegates) res src.bol)
         (emil cards)
-        ::
-          %tune
-        ~&  >>  q.cage.sign
-        :: pa-abet:(pa-agent-tune:(pa-abed:pa delegates) res src.bol)
-        that
       ==  ::  fact
       ::
         %poke-ack
@@ -182,8 +177,14 @@
 ++  arvo
   |=  [wire=(pole knot) =sign-arvo]
   ^+  that
-  ?+  sign-arvo  ~|(%bad-arvo-wire that)
-    [%eyre %bound *]  that
+  ?+    sign-arvo  ~|(%bad-arvo-wire that)
+      [%eyre %bound *]
+    that
+    ::
+      [%ames %tune *]
+    =^  cards  state
+      ob-abet:(ob-agent-tune:(ob-abed:ob queries) +>:sign-arvo)
+    (emil cards)
   ==
 ::
 ++  poke
@@ -261,7 +262,6 @@
   |_  $:  patrons=(set ship)
           delegates=(map ship status)
           requests=(set ship)
-          queries=(map query quest)
           deck=(list card)
       ==
   +*  pa  .
@@ -342,7 +342,6 @@
   |_  $:  patrons=(set ship)
           delegates=(map ship status)
           requests=(set ship)
-          queries=(map query quest)
           deck=(list card)
       ==
   +*  de  .
@@ -440,10 +439,7 @@
 ::
 ::  observer core
 ++  ob
-  |_  $:  patrons=(set ship)
-          delegates=(map ship status)
-          requests=(set ship)
-          queries=(map query quest)
+  |_  $:  queries=(map query quest)
           deck=(list card)
       ==
   +*  ob  .
@@ -472,5 +468,36 @@
         ==
       (ob-emil new-cards)
     ==  ::  %emissary-query
+  ++  ob-agent-tune
+    |=  [[=ship =path] roar=(unit roar:ames)]
+    ^+  ob
+    ::  if no value then just post a cleared value
+    ?~  roar
+      =?  queries  (~(has by queries) [%patron ship])
+        (~(put by queries) [%patron ship] [%unasked-for now.bol])
+      =?  queries  (~(has by queries) [%delegate ship])
+        (~(put by queries) [%delegate ship] [%unasked-for now.bol])
+      ob
+    ::  if a value then unpack it and update the appropriate queries
+    ::  (tale:pki:jael (pair path (unit (cask))))
+    ?>  =(%emissary-demand +<:(need roar))
+    =/  data=(map @p [@ud @])  (need +>:(need roar))
+    ~&  >  data
+    =/  ships  ~(tap by data)
+    =?  queries  (~(has by queries) [%patron ship])
+      %-  ~(uni by queries)
+      %-  malt
+      %+  turn
+      (murn ships |=([=^ship q=@ud r=@] ?.((~(has by queries) [%patron ship]) ~ `[%patron ship])))
+      |=(=query [query `quest`[%valid now.bol]])
+    =?  queries  (~(has by queries) [%delegate ship])
+      %-  ~(uni by queries)
+      %-  malt
+      %+  turn
+      (murn ships |=([=^ship q=@ud r=@] ?.((~(has by queries) [%delegate ship]) ~ `[%delegate ship])))
+      |=(=query [query `quest`[%valid now.bol]])
+    ob
+    ::  [%tune [~sampel-palnet /emissary/fine] `roar]
+    ::  [/g/x/0/emissary/delegates (set ship)]
   --  ::  observer core
 --

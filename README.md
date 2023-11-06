@@ -28,7 +28,16 @@ Special thanks to ~paldev for `/lib/rudder` and to ~midden-fabler for `%ahoy` (c
 
 Install over the wire from ~magbel.
 
+```hoon
+|install ~magbel %emissary
+```
+
 Install from source by cloning this repository then copying the contents of the `desk/` directory into your ship as usual.
+
+```sh
+git clone https://github.com/sigilante/emissary.git
+yes | cp -r emissary/desk/* zod/emissary
+```
 
 ### Patron
 
@@ -42,6 +51,8 @@ using CLI generators:
 :emissary|designate ~sampel-palnet
 :emissary|revoke ~sampel-palnet
 ```
+
+Served at `/app/emissary/patron`.
 
 ![](./img/screenshot-patron.png)
 
@@ -58,9 +69,15 @@ using CLI generators:
 :emissary|reject ~sampel
 ```
 
+Served at `/app/emissary/delegate`.
+
 ![](./img/screenshot-delegate.png)
 
 ### Observer
+
+An observer may query whether a point has any delegates or any patrons.
+
+Served at `/app/emissary/observer`.
 
 #### Local Scries
 
@@ -165,6 +182,6 @@ a response to a marked scry.
 
 ### Planned Work
 
-- add support for breach notifications
 - add frontend query buttons
 - add observer library
+- add support for breach notifications

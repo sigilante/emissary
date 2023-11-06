@@ -21,11 +21,12 @@
 +$  response  ?(%accept %reject)
 ::  status = current state of designation
 +$  status
-  $?  %pending
-      %valid
-      %rejected
-      %unknown    ::  for query/quest
-      ::%revoked  ::  XX nice to have
+  $?  %pending      ::  for trigger
+      %valid        ::  for response/demand
+      %rejected     ::  for response/demand
+      %unknown      ::  for query
+      %unasked-for  ::  for query
+      ::%revoked      ::  XX nice to have
   ==
 ::  demand scries
 +$  demand
