@@ -456,24 +456,25 @@
   ++  ob-poke-query
     |=  que=query
     ^+  ob
+    ~&  >>>  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//patrons]
     =.  queries  (~(put by queries) que *quest)
-    ~&  >>  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//patron/(scot %p ship.que)]
     ?-    -.que
         %patron
       =/  new-cards
-        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//patron/(scot %p ship.que)]
+        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//patrons] ::/(scot %p ship.que)]
         ==
       (ob-emil new-cards)
       ::
         %delegate
       =/  new-cards
-        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//delegate/(scot %p ship.que)]
+        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//delegates] ::/(scot %p ship.que)]
         ==
       (ob-emil new-cards)
     ==  ::  %emissary-query
   ++  ob-agent-tune
     |=  [[=ship =path] roar=(unit roar:ames)]
     ^+  ob
+    ~&  >>  [ship path]
     ::  if no value then just post a cleared value
     ?~  roar
       =?  queries  (~(has by queries) [%patron ship])
@@ -482,29 +483,33 @@
         (~(put by queries) [%delegate ship] [%unasked-for now.bol])
       ob
     ::  if a value then unpack it and update the appropriate queries
-    ::  (tale:pki:jael (pair path (unit (cask))))
-    ~&  >>>  roar
     ?>  =(%emissary-demand p:(need q.dat.u.roar))
-    =/  data  ;;(?([%patron ?] [%delegate ?]) q:(need q.dat.u.roar))
-    =/  trg=@p  (need (slaw %p ;;(@t (snag (dec (lent p.dat.u.roar)) `(list)`p.dat.u.roar))))
+    ::  XX this logic is for per-ship requests rather than all patrons/delegates
+    ::  XX keep for future use
+    :: =/  data  ;;(?([%patron ?] [%delegate ?]) q:(need q.dat.u.roar))
+    :: =/  trg=@p  (need (slaw %p ;;(@t (snag (dec (lent p.dat.u.roar)) `(list)`p.dat.u.roar))))
+    :: =?  queries  &(?=(%patron -.data) (~(has by queries) [%patron trg]))
+    ::   (~(put by queries) [%patron trg] [?:(=(%.y +:data) %valid %rejected) now.bol])
+    :: =?  queries  &(?=(%delegate -.data) (~(has by queries) [%delegate trg]))
+    ::   (~(put by queries) [%delegate trg] [?:(=(%.y +:data) %valid %rejected) now.bol])
+    =/  tag  -.q:(need q.dat.u.roar)
+    =/  data=?([%patrons p=(set ^ship)] [%delegates p=(set ^ship)])
+      ?:  =(%patrons tag)  ;;([%patrons p=(set ^ship)] q:(need q.dat.u.roar))
+      ?>  =(%delegates tag)  ;;([%delegates p=(set ^ship)] q:(need q.dat.u.roar))
     ~&  >  data
-    =?  queries  &(?=(%patron -.data) (~(has by queries) [%patron trg]))
-      (~(put by queries) [%patron trg] [?:(=(%.y +:data) %valid %rejected) now.bol])
-    =?  queries  &(?=(%delegate -.data) (~(has by queries) [%delegate trg]))
-      (~(put by queries) [%delegate trg] [?:(=(%.y +:data) %valid %rejected) now.bol])
-    :: =/  ships  ~(tap by data)
-    :: =?  queries  (~(has by queries) [%patron ship])
-    ::   %-  ~(uni by queries)
-    ::   %-  malt
-    ::   %+  turn
-    ::   (murn ships |=([=^ship q=@ud r=@] ?.((~(has by queries) [%patron ship]) ~ `[%patron ship])))
-    ::   |=(=query [query `quest`[%valid now.bol]])
-    :: =?  queries  (~(has by queries) [%delegate ship])
-      :: %-  ~(uni by queries)
-      :: %-  malt
-      :: %+  turn
-      :: (murn ships |=([=^ship q=@ud r=@] ?.((~(has by queries) [%delegate ship]) ~ `[%delegate ship])))
-      :: |=(=query [query `quest`[%valid now.bol]])
+    =/  ships  ~(tap in `(set ^ship)`p.data)
+    =?  queries  (~(has by queries) [%patron ship])
+      %-  ~(uni by queries)
+      %-  malt
+      %+  turn
+      (murn ships |=(=^ship ?.((~(has by queries) [%patron ship]) ~ `[%patron ship])))
+      |=(=query [query `quest`[%valid now.bol]])
+    =?  queries  (~(has by queries) [%delegate ship])
+      %-  ~(uni by queries)
+      %-  malt
+      %+  turn
+      (murn ships |=(=^ship ?.((~(has by queries) [%delegate ship]) ~ `[%delegate ship])))
+      |=(=query [query `quest`[%valid now.bol]])
     ob
   --  ::  observer core
 --
