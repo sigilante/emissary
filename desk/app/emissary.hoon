@@ -107,14 +107,14 @@
 ++  peek
   |=  pol=(pole knot)
   ^-  (unit (unit cage))
-  ?+    pol  ~|(%invalid-scry-path !!)
-    [%y %delegates ~]        ``emissary-demand+!>(`(set ship)`(silt `(list ship)`(turn (skim ~(tap by delegates) |=([=ship =status] =(%valid status))) head)))
-    [%y %patrons ~]          ``emissary-demand+!>(patrons)
-    [%y %outgoing ~]         ``emissary-demand+!>(`(set ship)`(silt `(list ship)`(turn (skim ~(tap by delegates) |=([=ship =status] =(%pending status))) head)))
-    [%y %incoming ~]         ``emissary-demand+!>(requests)
-    [%x %delegate ship=@ ~]  ``emissary-demand+!>((~(has by delegates) `@p`(need (slaw %p ship:pol))))
-    [%x %patron ship=@ ~]    ``emissary-demand+!>((~(has in patrons) `@p`(need (slaw %p ship:pol))))
-  ==
+  ?+  pol  ~|(%invalid-scry-path !!)
+    [%y %delegates ~]        ``[%emissary-demand !>([%delegates `(set ship)`(silt `(list ship)`(turn (skim ~(tap by delegates) |=([=ship =status] =(%valid status))) head))])]
+    [%y %patrons ~]          ``[%emissary-demand !>([%patrons patrons])]
+    [%y %outgoing ~]         ``[%emissary-demand !>([%outgoing `(set ship)`(silt `(list ship)`(turn (skim ~(tap by delegates) |=([=ship =status] =(%pending status))) head))])]
+    [%y %incoming ~]         ``[%emissary-demand !>([%requests requests])]
+    [%x %delegate ship=@ ~]  ``[%emissary-demand !>([%delegate (~(has by delegates) `@p`(need (slaw %p ship:pol)))])]
+    [%x %patron ship=@ ~]    ``[%emissary-demand !>([%patron (~(has in patrons) `@p`(need (slaw %p ship:pol)))])]
+  ==  ::  path
 ::
 ++  watch
   |=  pol=(pole knot)
@@ -177,7 +177,8 @@
 ++  arvo
   |=  [wire=(pole knot) =sign-arvo]
   ^+  that
-  ?+    sign-arvo  ~|(%bad-arvo-wire that)
+  ~&  >>  wire
+  ?+    sign-arvo  ~|(%bad-arvo-sign that)
       [%eyre %bound *]
     that
     ::
@@ -321,8 +322,8 @@
       =.  delegates  (~(put by delegates) ship %valid)
       =/  new-cards
         :~  [%pass /emissary/fine %grow /delegate/(scot %p ship) noun+%.y]
-            [%pass /emissary/fine %grow /delegates noun+delegates]
-            [%pass /emissary/fine %grow /outgoing noun+`(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%pending status))) head))]
+            [%pass /emissary/fine %grow /delegates [%emissary-demand %delegates delegates]]
+            [%pass /emissary/fine %grow /outgoing [%emissary-demand %outgoing `(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%pending status))) head))]]
         ==
       (pa-emil new-cards)
       ::
@@ -330,8 +331,8 @@
       =.  delegates  (~(put by delegates) ship %rejected)
       =/  new-cards
         :~  [%pass /emissary/fine %grow /delegate/(scot %p ship) noun+%.n]
-            [%pass /emissary/fine %grow /delegates noun+delegates]
-            [%pass /emissary/fine %grow /outgoing noun+`(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%pending status))) head))]
+            [%pass /emissary/fine %grow /delegates [%emissary-demand %delegates delegates]]
+            [%pass /emissary/fine %grow /outgoing [%emissary-demand %outgoing `(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%pending status))) head))]]
         ==
       (pa-emil new-cards)
     ==  ::  %emissary-response
@@ -361,8 +362,8 @@
       ::  simply notify the requester.
       %-  de-emil
       :~  [%give %fact ~ %emissary-response !>(%accept)]
-          [%pass /emissary/fine %grow /patron/(scot %p src.bol) emissary-demand+[%patron %.y]]
-          [%pass /emissary/fine %grow /patrons emissary-demand+[%patrons patrons]]
+          [%pass /emissary/fine %grow /patron/(scot %p src.bol) [%emissary-demand %patron %.y]]
+          [%pass /emissary/fine %grow /patrons [%emissary-demand %patrons patrons]]
           ::  XX formally unnecessary to update /incoming here
       ==
     de
@@ -376,8 +377,8 @@
         ::  simply notify the subscribers.
         =/  new-cards
           :~  [%give %fact ~[/request] %emissary-response !>(%accept)]
-              [%pass /emissary/fine %grow /patron/(scot %p ship) emissary-demand+[%patron %.y]]
-              [%pass /emissary/fine %grow /patrons emissary-demand+[%patrons patrons]]
+              [%pass /emissary/fine %grow /patron/(scot %p ship) [%emissary-demand %patron %.y]]
+              [%pass /emissary/fine %grow /patrons [%emissary-demand %patrons patrons]]
               ::  XX formally unnecessary to update /incoming here
           ==
         (de-emil new-cards)
@@ -391,7 +392,7 @@
         =/  =rope:hark    [~ ~ q.byk.bol /(scot %p ship)/[dap.bol]]
         =/  =action:hark  [%add-yarn & & id rope now.bol con /[dap.bol] ~]
         :~  [%pass /hark %agent [our.bol %hark] %poke %hark-action !>(action)]
-            [%pass /emissary/fine %grow /incoming emissary-demand+[%incoming requests]]
+            [%pass /emissary/fine %grow /incoming [%emissary-demand %incoming requests]]
         ==
       (de-emil new-cards)
       ::
@@ -400,9 +401,9 @@
       =.  patrons  (~(del in patrons) ship)
       =.  requests  (~(del in requests) ship)
       =/  new-cards
-      :~  [%pass /emissary/fine %grow /patron/(scot %p ship) emissary-demand+[%patron %.n]]
-          [%pass /emissary/fine %grow /patrons emissary-demand+[%patrons patrons]]
-          [%pass /emissary/fine %grow /incoming emissary-demand+[%incoming requests]]
+      :~  [%pass /emissary/fine %grow /patron/(scot %p ship) [%emissary-demand %patron %.n]]
+          [%pass /emissary/fine %grow /patrons [%emissary-demand %patrons patrons]]
+          [%pass /emissary/fine %grow /incoming [%emissary-demand %incoming requests]]
       ==
     (de-emil new-cards)
     ==  ::  %emissary-request
@@ -417,10 +418,11 @@
       =/  new-cards=(list card)
         :~  [%give %fact ~[/request] %emissary-response !>(%accept)]
             [%give %kick ~[/request] `src.bol]
-            [%pass /emissary/fine %grow /patron/(scot %p ship.dec) emissary-demand+[%patron %.y]]
-            [%pass /emissary/fine %grow /patrons emissary-demand+[%patrons patrons]]
-            [%pass /emissary/fine %grow /incoming emissary-demand+[%incoming requests]]
+            [%pass /emissary/fine %grow /patron/(scot %p ship.dec) [%emissary-demand %patron %.y]]
+            [%pass /emissary/fine %grow /patrons [%emissary-demand %patrons patrons]]
+            [%pass /emissary/fine %grow /incoming [%emissary-demand %incoming requests]]
         ==
+      ~&  >>>  new-cards
       (de-emil (flop new-cards))
       ::
         %reject
@@ -429,9 +431,9 @@
       =/  new-cards=(list card)
         :~  [%give %fact ~[/request] %emissary-response !>(%reject)]
             [%give %kick ~[/request] `ship.dec]
-            [%pass /emissary/fine %grow /patron/(scot %p ship.dec) emissary-demand+[%patron %.n]]
-            [%pass /emissary/fine %grow /patrons emissary-demand+[%patrons patrons]]
-            [%pass /emissary/fine %grow /incoming emissary-demand+[%incoming requests]]
+            [%pass /emissary/fine %grow /patron/(scot %p ship.dec) [%emissary-demand %patron %.n]]
+            [%pass /emissary/fine %grow /patrons [%emissary-demand %patrons patrons]]
+            [%pass /emissary/fine %grow /incoming [%emissary-demand %incoming requests]]
         ==
       (de-emil (flop new-cards))
     ==  ::  %emissary-response
@@ -455,16 +457,17 @@
     |=  que=query
     ^+  ob
     =.  queries  (~(put by queries) que *quest)
+    ~&  >>  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//patron/(scot %p ship.que)]
     ?-    -.que
         %patron
       =/  new-cards
-        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary/patrons]
+        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//patron/(scot %p ship.que)]
         ==
       (ob-emil new-cards)
       ::
         %delegate
       =/  new-cards
-        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary/delegates]
+        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//delegate/(scot %p ship.que)]
         ==
       (ob-emil new-cards)
     ==  ::  %emissary-query
@@ -480,24 +483,28 @@
       ob
     ::  if a value then unpack it and update the appropriate queries
     ::  (tale:pki:jael (pair path (unit (cask))))
-    ?>  =(%emissary-demand +<:(need roar))
-    =/  data=(map @p [@ud @])  (need +>:(need roar))
+    ~&  >>>  roar
+    ?>  =(%emissary-demand p:(need q.dat.u.roar))
+    =/  data  ;;(?([%patron ?] [%delegate ?]) q:(need q.dat.u.roar))
+    =/  trg=@p  (need (slaw %p ;;(@t (snag (dec (lent p.dat.u.roar)) `(list)`p.dat.u.roar))))
     ~&  >  data
-    =/  ships  ~(tap by data)
-    =?  queries  (~(has by queries) [%patron ship])
-      %-  ~(uni by queries)
-      %-  malt
-      %+  turn
-      (murn ships |=([=^ship q=@ud r=@] ?.((~(has by queries) [%patron ship]) ~ `[%patron ship])))
-      |=(=query [query `quest`[%valid now.bol]])
-    =?  queries  (~(has by queries) [%delegate ship])
-      %-  ~(uni by queries)
-      %-  malt
-      %+  turn
-      (murn ships |=([=^ship q=@ud r=@] ?.((~(has by queries) [%delegate ship]) ~ `[%delegate ship])))
-      |=(=query [query `quest`[%valid now.bol]])
+    =?  queries  &(?=(%patron -.data) (~(has by queries) [%patron trg]))
+      (~(put by queries) [%patron trg] [?:(=(%.y +:data) %valid %rejected) now.bol])
+    =?  queries  &(?=(%delegate -.data) (~(has by queries) [%delegate trg]))
+      (~(put by queries) [%delegate trg] [?:(=(%.y +:data) %valid %rejected) now.bol])
+    :: =/  ships  ~(tap by data)
+    :: =?  queries  (~(has by queries) [%patron ship])
+    ::   %-  ~(uni by queries)
+    ::   %-  malt
+    ::   %+  turn
+    ::   (murn ships |=([=^ship q=@ud r=@] ?.((~(has by queries) [%patron ship]) ~ `[%patron ship])))
+    ::   |=(=query [query `quest`[%valid now.bol]])
+    :: =?  queries  (~(has by queries) [%delegate ship])
+      :: %-  ~(uni by queries)
+      :: %-  malt
+      :: %+  turn
+      :: (murn ships |=([=^ship q=@ud r=@] ?.((~(has by queries) [%delegate ship]) ~ `[%delegate ship])))
+      :: |=(=query [query `quest`[%valid now.bol]])
     ob
-    ::  [%tune [~sampel-palnet /emissary/fine] `roar]
-    ::  [/g/x/0/emissary/delegates (set ship)]
   --  ::  observer core
 --

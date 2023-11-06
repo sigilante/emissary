@@ -139,6 +139,25 @@ its head.  (The tail is the signature.)  That head:
 [/g/x/0/emissary/delegate/~sampel [~ %.y]]
 ```
 
+You can (locally) check currently bound scry paths thus:
+
+```hoon
+> .^(* %gx /=emissary=//patron/~zod)
+0
+
+> ;;([%patron ?] .^(* %gx /=emissary=//patron/~zod))
+[%patron %.n]
+
+> .^((set @p) %gy /=emissary=/incoming)
+{~zod}
+
+> .^((list path) %gt /=emissary=//patron)
+~[/patron/~zod]
+
+> .^([%ud @ud] %gw /=emissary=//patrons)
+[%ud 11]
+```
+
 A third-party agent should be careful to use the latest revision 
 of the delegation.  It remains to decide what is a good interval 
 for this attestation to remain valid (i.e. if a star is taken 
@@ -178,7 +197,7 @@ a response to a marked scry.
 ##  Changelog
 
 - `[1 0 0]` initial release, local scry only
-- `[1 1 0]` add support for remote scry; reorganize actions; adjust scry paths
+- `[1 1 0]` add support for remote scry; reorganize actions; adjust scry paths; add (nonfunctional) observer page
 
 ### Planned Work
 
