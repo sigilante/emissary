@@ -157,68 +157,68 @@
               ==
             ==
           ==
-          ;*  rejecteds
-          ;*  pendings
           ;*  valids
+          ;*  unaskeds
+          ;*  unknowns
         ==
       ==
     ==
   ::
-  ++  revoker
+  ++  canceller
     |=  =ship
     ^-  manx
     ;form(method "post")
       ;input(type "hidden", name "who", value "{(scow %p ship)}");
-      ;button(type "submit", name "what", value "revoke"):"×"
+      ;button(type "submit", name "what", value "cancel"):"×"
     ==
   ::
   ++  peers
-    |=  [=status pez=(list [ship status])]
+    |=  [=status pez=(list [query quest])]
     ^-  (list manx)
     %+  turn  pez
-    |=  [=ship =^status]
+    |=  [=query =quest]
     ^-  manx
     ;tr
       ;td
-        ;+  (sigil ship)
+        ;+  (sigil ship.query)
       ==
       ;td
-        ; {(scow %p ship)}
+        ; {(scow %p ship.query)}
       ==
-      ;+  ?:  ?=(%valid status)
-            ;td
-              ;+  (revoker ship)
-            ==
-          ?:  ?=(%pending status)
-            ;td
-              ;+  (revoker ship)
-            ==
-          ?>  ?=(%rejected status)
-          ;td
-            ;p.red:"rejected"
-          ==
+      ;+  ?:  ?=(%valid status.quest)
+            ?:  ?=(%patron kind.query)
+              ;td:"valid patron {<timestamp.quest>}"
+            ;td:"valid delegate {<timestamp.quest>}"
+          ?:  ?=(%unasked-for status.quest)
+            ?:  ?=(%patron kind.query)
+              ;td:"unrequested patron {<timestamp.quest>}"
+            ;td:"unrequested delegate {<timestamp.quest>}"
+          ?>  ?=(%unknown status.quest)
+            ?:  ?=(%patron kind.query)
+              ;td:"unrequested patron {<timestamp.quest>}"
+            ;td:"unrequested delegate {<timestamp.quest>}"
     ==
   ::
   ++  valids
     ^-  (list manx)
     %+  peers  %valid
-    %+  skim  (sort ~(tap by delegates) dor)
-    |=  [=ship =status]
-    ?:(=(%valid status) & |)
+    %+  skim  (sort ~(tap by queries) dor)
+    |=  [=query =quest]
+    ?:(=(%valid status.quest) & |)
   ::
-  ++  pendings
+  ++  unaskeds
     ^-  (list manx)
-    %+  peers  %pending
-    %+  skim  (sort ~(tap by delegates) dor)
-    |=  [=ship =status]
-    ?:(=(%pending status) & |)
+    %+  peers  %unasked-for
+    %+  skim  (sort ~(tap by queries) dor)
+    |=  [=query =quest]
+    ?:(=(%unasked-for status.quest) & |)
   ::
-  ++  rejecteds
+  ++  unknowns
     ^-  (list manx)
-    %+  peers  %rejected
-    %+  skim  (sort ~(tap by delegates) dor)
-    |=  [=ship =status]
-    ?:(=(%rejected status) & |)
+    %+  peers  %unknown
+    %+  skim  (sort ~(tap by queries) dor)
+    |=  [=query =quest]
+    ?:(=(%unknown status.quest) & |)
   ::
   ++  sigil
     |=  =ship
