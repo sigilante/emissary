@@ -3,7 +3,7 @@
     color+0x64.5050
     image+'https://raw.githubusercontent.com/sigilante/emissary/master/img/emissary-icon.png'
     site+/apps/emissary
-    version+[1 1 0]
+    version+[1 1 1]
     website+'https://urbit.org'
     license+'MIT'
 ==

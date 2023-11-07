@@ -34,87 +34,6 @@
   ::
   ++  style
     '''
-    body, html {
-        font-family: 'Urbit Sans TT SemiBold', sans-serif;
-        height: 100%;
-        width: 100%;
-        margin: 0;
-    }
-    body {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
-    body > div {
-        max-width: 320px;
-        width: 100%;
-    }
-
-    code { font-family: Urbit Sans Mono TT SemiBold, monospace; }
-
-    form { margin: 0.2em; padding: 0.2em; }
-
-    .red { font-weight: bold; color: #dd2222; }
-    .green { font-weight: bold; color: #229922; }
-
-    a {
-      display: inline-block;
-      color: inherit;
-      padding: 0;
-      margin-top: 0;
-    }
-
-    table {
-        width: 80%;
-    }
-
-    tr:first-of-type {
-        font-weight: 700;
-        color: #918C84;
-    }
-
-    .sigil {
-      display: inline-block;
-      vertical-align: middle;
-      margin: 0 0.5em 0 0;
-      padding: 0.2em;
-      border-radius: 0.2em;
-    }
-
-    .sigil * {
-      margin: 0;
-      padding: 0;
-    }
-
-    .label {
-      display: inline-block;
-      background-color: #ccc;
-      border-radius: 3px;
-      margin-right: 0.5em;
-      padding: 0.1em;
-    }
-
-    .label input[type="text"] {
-      max-width: 100px;
-    }
-
-    .label span {
-      margin: 0 0 0 0.2em;
-    }
-
-    button {
-      padding: 0.2em 0.5em;
-    }
-
-    .index-btn {
-      background-color: #2222dd;
-      border-radius: 5px;
-      color: white;
-      padding: 15px 32px;
-      display: inline-block;
-    }
-
     * { margin: 0; padding: 0; }
     :root {
       --black: #38391f;
@@ -415,8 +334,8 @@
     tr.rsvp a {
       text-decoration: underline;
     }
-    button {
-      display: block;
+    .button {
+      display: inline-block;
       background-color: var(--green);
       border: 0px;
       border-radius: var(--radius);
@@ -594,7 +513,7 @@
         This delegate portal allows you to review, accept, or reject delegation
         to you from a star.
 
-        ;a(href "/apps/emissary/index", class "index-btn"):"back to index"
+        ;a(href "/apps/emissary/index", class "button"):"« index"
 
         Your current patrons are:
 
