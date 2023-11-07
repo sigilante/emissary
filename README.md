@@ -187,7 +187,7 @@ a response to a marked scry.
 - `+accept` for a delegate to accept a patron.
 - `+designate` for a patron to request a delegate.
 - `+reject` for a delegate to refust a patron.
-- `+reboke` for a patron to unrequest a delegate.
+- `+revoke` for a patron to unrequest a delegate.
 
 ### `/app/emissary/webui/*`
 
