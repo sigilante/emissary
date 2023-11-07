@@ -197,10 +197,9 @@ a response to a marked scry.
 ##  Changelog
 
 - `[1 0 0]` initial release, local scry only
-- `[1 1 0]` add support for remote scry; reorganize actions; adjust scry paths; add (nonfunctional) observer page
+- `[1 1 0]` add support for remote scry; reorganize actions; adjust scry paths; add observer page
 
 ### Planned Work
 
-- add frontend query buttons
 - add observer library
 - add support for breach notifications
