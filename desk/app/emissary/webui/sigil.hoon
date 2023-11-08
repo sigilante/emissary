@@ -3,7 +3,7 @@
 /-  *emissary
 /+  rudder, sigil
 ::
-^-  (page:rudder [(set ship) (map ship status) (set ship) (map query quest)] ?(trigger decide query))
+^-  (page:rudder [(set ship) (map ship status) (set ship) queries] ?(trigger decide query))
 |_  [=bowl:gall * *]
 ++  argue  !!
 ++  final  !!

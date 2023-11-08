@@ -24,9 +24,8 @@
   $?  %pending      ::  for trigger
       %valid        ::  for response/demand
       %rejected     ::  for response/demand
-      %unknown      ::  for query
       %unasked-for  ::  for query
-      ::%revoked      ::  XX nice to have
+      %unknown      ::  for query
   ==
 ::  demand scries
 +$  demand
@@ -38,7 +37,13 @@
       [%patron p=?]
   ==
 ::  queries
+::  (~(has by (~(has by queries) ~zod) %patron))
+::  (~(has bi queries) ~zod %patron)
+::  ->  [%valid ~2023.11.7 [~ {~zod ~bud ~nec}]]
+::  ->  [%unknown ~2023.11.7 ~]
 +$  kind  ?(%patron %delegate)
++$  quests  (map kind quest)
++$  queries  (map ship quests)
 +$  query  [=kind =ship]
-+$  quest  [=status timestamp=@da]
++$  quest  [=status timestamp=@da ships=(unit (set ship))]
 --

@@ -2,10 +2,12 @@
 ::::
 ::
 /-  *emissary
-/+  rudder, sigil-svg=sigil
+/+  *mip,
+    rudder,
+    sigil-svg=sigil
 ::
-^-  (page:rudder [(set ship) (map ship status) (set ship) (map query quest)] ?(trigger decide query))
-|_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship) queries=(map query quest)]]
+^-  (page:rudder [(set ship) (map ship status) (set ship) queries] ?(trigger decide query))
+|_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship) queries=queries]]
 ++  argue
   |=  [headers=header-list:http body=(unit octs)]
   ^-  $@(brief:rudder query)
@@ -535,9 +537,12 @@
               ==
             ==
           ==
-          ;*  valids
-          ;*  unaskeds
-          ;*  unknowns
+          ;*  valids-patrons
+          ;*  valids-delegates
+          ;*  unaskeds-patrons
+          ;*  unaskeds-delegates
+          ;*  unknowns-patrons
+          ;*  unknowns-delegates
         ==
       ==
     ==
@@ -551,51 +556,98 @@
     ==
   ::
   ++  peers
-    |=  [=status pez=(list [query quest])]
+    |=  pez=(list [ship kind quest])
     ^-  (list manx)
+    %-  zing
     %+  turn  pez
-    |=  [=query =quest]
+    |=  [=ship =kind =quest]
+    ^-  (list manx)
+    =/  ships  ships:quest
+    =/  ships  `(list ^ship)`?~(ships ~ ~(tap in (need ships)))
+    (turn ships (cury (cury (cury entry status:quest) kind) timestamp:quest))
+  ::
+  ++  entry
+    |=  [=status =kind timestamp=@da =ship]
     ^-  manx
     ;tr
       ;td
-        ;+  (sigil ship.query)
+        ;+  (sigil ship)
       ==
       ;td
-        ; {(scow %p ship.query)}
+        ; {(scow %p ship)}
       ==
-      ;+  ?:  ?=(%valid status.quest)
-            ?:  ?=(%patron kind.query)
-              ;td:"valid patron {<timestamp.quest>}"
-            ;td:"valid delegate {<timestamp.quest>}"
-          ?:  ?=(%unasked-for status.quest)
-            ?:  ?=(%patron kind.query)
-              ;td:"unrequested patron {<timestamp.quest>}"
-            ;td:"unrequested delegate {<timestamp.quest>}"
-          ?>  ?=(%unknown status.quest)
-            ?:  ?=(%patron kind.query)
-              ;td:"unrequested patron {<timestamp.quest>}"
-            ;td:"unrequested delegate {<timestamp.quest>}"
+      ;+  ?:  ?=(%valid status)
+            ?:  ?=(%patron kind)
+              ;td:"valid patron {<timestamp>}"
+            ;td:"valid delegate {<timestamp>}"
+          ?:  ?=(%unasked-for status)
+            ?:  ?=(%patron kind)
+              ;td:"unrequested patron {<timestamp>}"
+            ;td:"unrequested delegate {<timestamp>}"
+          ?>  ?=(%unknown status)
+            ?:  ?=(%patron kind)
+              ;td:"unrequested patron {<timestamp>}"
+            ;td:"unrequested delegate {<timestamp>}"
     ==
   ::
-  ++  valids
+  ++  valids-patrons
     ^-  (list manx)
-    %+  peers  %valid
-    %+  skim  (sort ~(tap by queries) dor)
-    |=  [=query =quest]
+    %-  peers
+    ^-  (list [ship kind quest])
+    %+  skim  `(list [ship kind quest])`(sort ~(tap bi queries) dor)
+    |=  [=ship =kind =quest]
+    ?.  =(%patron kind)  |
+    ?~  ships.quest  |
     ?:(=(%valid status.quest) & |)
   ::
-  ++  unaskeds
+  ++  valids-delegates
     ^-  (list manx)
-    %+  peers  %unasked-for
-    %+  skim  (sort ~(tap by queries) dor)
-    |=  [=query =quest]
+    %-  peers
+    ^-  (list [ship kind quest])
+    %+  skim  `(list [ship kind quest])`(sort ~(tap bi queries) dor)
+    |=  [=ship =kind =quest]
+    ?.  =(%delegate kind)  |
+    ?~  ships.quest  |
+    ?:(=(%valid status.quest) & |)
+  ::
+  ++  unaskeds-patrons
+    ^-  (list manx)
+    %-  peers
+    ^-  (list [ship kind quest])
+    %+  skim  `(list [ship kind quest])`(sort ~(tap bi queries) dor)
+    |=  [=ship =kind =quest]
+    ?.  =(%patron kind)  |
+    ?~  ships.quest  |
     ?:(=(%unasked-for status.quest) & |)
   ::
-  ++  unknowns
+  ++  unaskeds-delegates
     ^-  (list manx)
-    %+  peers  %unknown
-    %+  skim  (sort ~(tap by queries) dor)
-    |=  [=query =quest]
+    %-  peers
+    ^-  (list [ship kind quest])
+    %+  skim  `(list [ship kind quest])`(sort ~(tap bi queries) dor)
+    |=  [=ship =kind =quest]
+    ?.  =(%delegate kind)  |
+    ?~  ships.quest  |
+    ?:(=(%unasked-for status.quest) & |)
+  ::
+  ++  unknowns-patrons
+    ^-  (list manx)
+    %-  peers
+    ^-  (list [ship kind quest])
+    %+  skim  `(list [ship kind quest])`(sort ~(tap bi queries) dor)
+    |=  [=ship =kind =quest]
+    ?.  =(%patron kind)  |
+    ?~  ships.quest  |
+    ?:(=(%unknown status.quest) & |)
+  ::
+  ++  unknowns-delegates
+    ^-  (list manx)
+    %-  peers
+    ^-  (list [ship kind quest])
+    %+  skim  `(list [ship kind quest])`(sort ~(tap bi queries) dor)
+    |=  [=ship =kind =quest]
+    ?.  =(%delegate kind)  |
+    ?~  ships.quest  |
     ?:(=(%unknown status.quest) & |)
   ::
   ++  sigil

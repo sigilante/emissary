@@ -1,14 +1,20 @@
-/-  *emissary, hark
-/+  default-agent, dbug, *emissary, rudder
+/-  *emissary,
+    hark
+/+  dbug,
+    default-agent,
+    *emissary,
+    *mip,
+    rudder
 ::
 /~  pages
-    (page:rudder [(set ship) (map ship status) (set ship) (map query quest)] ?(trigger decide query))
+    (page:rudder [(set ship) (map ship status) (set ship) queries] ?(trigger decide query))
     /app/emissary/webui
 ::
 |%
 +$  versioned-state
   $%  state-zero
       state-one
+      state-two
   ==
 +$  state-zero
   $:  %zero
@@ -21,12 +27,19 @@
       patrons=(set ship)
       delegates=(map ship status)
       requests=(set ship)
-      queries=(map query quest)
+      queries=queries
+  ==
++$  state-two
+  $:  %two
+      patrons=(set ship)
+      delegates=(map ship status)
+      requests=(set ship)
+      =queries
   ==
 +$  card  card:agent:gall
 --
 %-  agent:dbug
-=|  state-one
+=|  state-two
 =*  state  -
 ^-  agent:gall
 =<
@@ -99,8 +112,12 @@
   =/  old  !<(versioned-state old-vase)
   ?-    -.old
       %zero
-    that(state [%one patrons.old delegates.old requests.old *(map query quest)])
+    that(state [%two patrons.old delegates.old requests.old *^queries])
       %one
+    ::  okay to lose old queries at this point, so just bunt
+    that(state [%two patrons.old delegates.old requests.old *^queries])
+      %two
+    ~&  >  '%emissary loaded'
     that(state old)
   ==
 ::
@@ -322,7 +339,7 @@
       =.  delegates  (~(put by delegates) ship %valid)
       =/  new-cards
         :~  [%pass /emissary/fine %grow /delegate/(scot %p ship) noun+%.y]
-            [%pass /emissary/fine %grow /delegates [%emissary-demand %delegates delegates]]
+            [%pass /emissary/fine %grow /delegates [%emissary-demand %delegates `(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%valid status))) head))]]
             [%pass /emissary/fine %grow /outgoing [%emissary-demand %outgoing `(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%pending status))) head))]]
         ==
       (pa-emil new-cards)
@@ -331,7 +348,7 @@
       =.  delegates  (~(put by delegates) ship %rejected)
       =/  new-cards
         :~  [%pass /emissary/fine %grow /delegate/(scot %p ship) noun+%.n]
-            [%pass /emissary/fine %grow /delegates [%emissary-demand %delegates delegates]]
+            [%pass /emissary/fine %grow /delegates [%emissary-demand %delegates `(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%valid status))) head))]]
             [%pass /emissary/fine %grow /outgoing [%emissary-demand %outgoing `(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%pending status))) head))]]
         ==
       (pa-emil new-cards)
@@ -422,7 +439,6 @@
             [%pass /emissary/fine %grow /patrons [%emissary-demand %patrons patrons]]
             [%pass /emissary/fine %grow /incoming [%emissary-demand %incoming requests]]
         ==
-      ~&  >>>  new-cards
       (de-emil (flop new-cards))
       ::
         %reject
@@ -441,23 +457,22 @@
 ::
 ::  observer core
 ++  ob
-  |_  $:  queries=(map query quest)
+  |_  $:  =^queries
           deck=(list card)
       ==
   +*  ob  .
   ++  ob-emit  |=(c=card ob(deck [c deck]))
   ++  ob-emil  |=(lc=(list card) ob(deck (welp lc deck)))
   ++  ob-abed
-    |=  =(map query quest)
-    ob(queries map)
+    |=  =^^queries
+    ob(queries queries)
   ++  ob-abet
     ^-  (quip card _state)
     [(flop deck) state(queries queries)]
   ++  ob-poke-query
     |=  que=query
     ^+  ob
-    ~&  >>>  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//patrons]
-    =.  queries  (~(put by queries) que *quest)
+    =.  queries  (~(put bi queries) +.que -.que *quest)
     ?-    -.que
         %patron
       =/  new-cards
@@ -474,13 +489,12 @@
   ++  ob-agent-tune
     |=  [[=ship =path] roar=(unit roar:ames)]
     ^+  ob
-    ~&  >>  [ship path]
     ::  if no value then just post a cleared value
     ?~  roar
-      =?  queries  (~(has by queries) [%patron ship])
-        (~(put by queries) [%patron ship] [%unasked-for now.bol])
-      =?  queries  (~(has by queries) [%delegate ship])
-        (~(put by queries) [%delegate ship] [%unasked-for now.bol])
+      =?  queries  (~(has bi queries) ship %patron)
+        (~(put bi queries) ship %patron [%unasked-for now.bol ~])
+      =?  queries  (~(has bi queries) ship %delegate)
+        (~(put bi queries) ship %delegate [%unasked-for now.bol ~])
       ob
     ::  if a value then unpack it and update the appropriate queries
     ?>  =(%emissary-demand p:(need q.dat.u.roar))
@@ -494,22 +508,15 @@
     ::   (~(put by queries) [%delegate trg] [?:(=(%.y +:data) %valid %rejected) now.bol])
     =/  tag  -.q:(need q.dat.u.roar)
     =/  data=?([%patrons p=(set ^ship)] [%delegates p=(set ^ship)])
-      ?:  =(%patrons tag)  ;;([%patrons p=(set ^ship)] q:(need q.dat.u.roar))
-      ?>  =(%delegates tag)  ;;([%delegates p=(set ^ship)] q:(need q.dat.u.roar))
-    ~&  >  data
+      ?:  =(%patrons tag)  ;;([%patrons p=(set ^ship)] [tag +:q:(need q.dat.u.roar)])
+      ?>  =(%delegates tag)  ;;([%delegates p=(set ^ship)] [tag +:q:(need q.dat.u.roar)])
     =/  ships  ~(tap in `(set ^ship)`p.data)
-    =?  queries  (~(has by queries) [%patron ship])
-      %-  ~(uni by queries)
-      %-  malt
-      %+  turn
-      (murn ships |=(=^ship ?.((~(has by queries) [%patron ship]) ~ `[%patron ship])))
-      |=(=query [query `quest`[%valid now.bol]])
-    =?  queries  (~(has by queries) [%delegate ship])
-      %-  ~(uni by queries)
-      %-  malt
-      %+  turn
-      (murn ships |=(=^ship ?.((~(has by queries) [%delegate ship]) ~ `[%delegate ship])))
-      |=(=query [query `quest`[%valid now.bol]])
+    ~&  ships
+    =?  queries  &(=(%patrons tag) (~(has bi queries) ship %patron))
+      (~(put bi queries) ship %patron [%valid now.bol `p.data])
+    =?  queries  &(=(%delegate tag) (~(has bi queries) ship %delegate))
+      (~(put bi queries) ship %delegate [%valid now.bol `p.data])
+    ~&  >>>  queries
     ob
   --  ::  observer core
 --
