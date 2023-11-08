@@ -199,6 +199,7 @@ a response to a marked scry.
 - `[1 0 0]` initial release, local scry only
 - `[1 1 0]` add support for remote scry; reorganize actions; adjust scry paths; add observer page
 - `[1 1 1]` adjust CSS
+- `[1 2 0]` hotfix remote scry on livenet; rework query data structure
 
 ### Planned Work
 

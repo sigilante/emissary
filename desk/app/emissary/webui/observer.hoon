@@ -537,11 +537,27 @@
               ==
             ==
           ==
+          ;tr
+            ;td:"Valid Patrons"
+            ;td:""
+          ==
           ;*  valids-patrons
+          ;tr
+            ;td:"Valid Delegates"
+            ;td:""
+          ==
           ;*  valids-delegates
+          ;tr
+            ;td:"Pending Patrons"
+            ;td:""
+          ==
           ;*  unaskeds-patrons
-          ;*  unaskeds-delegates
           ;*  unknowns-patrons
+          ;tr
+            ;td:"Pending Delegates"
+            ;td:""
+          ==
+          ;*  unaskeds-delegates
           ;*  unknowns-delegates
         ==
       ==
@@ -564,31 +580,34 @@
     ^-  (list manx)
     =/  ships  ships:quest
     =/  ships  `(list ^ship)`?~(ships ~ ~(tap in (need ships)))
-    (turn ships (cury (cury (cury entry status:quest) kind) timestamp:quest))
+    ?:  |(=(%unasked-for status.quest) =(%unknown status.quest))
+      ~[(entry status.quest kind timestamp.quest ship ~zod)]
+    (turn ships (cury (cury (cury (cury entry status:quest) kind) timestamp:quest) ship))
   ::
   ++  entry
-    |=  [=status =kind timestamp=@da =ship]
+    |=  [=status =kind timestamp=@da =host=ship =ship]
     ^-  manx
     ;tr
       ;td
-        ;+  (sigil ship)
+        ;+  (sigil host-ship)
       ==
       ;td
-        ; {(scow %p ship)}
+        ; {(scow %p host-ship)}
       ==
       ;+  ?:  ?=(%valid status)
             ?:  ?=(%patron kind)
-              ;td:"valid patron {<timestamp>}"
-            ;td:"valid delegate {<timestamp>}"
+              ;td:"valid patron {<ship>} {<timestamp>}"
+            ;td:"valid delegate {<ship>} {<timestamp>}"
           ?:  ?=(%unasked-for status)
             ?:  ?=(%patron kind)
-              ;td:"unrequested patron {<timestamp>}"
-            ;td:"unrequested delegate {<timestamp>}"
+              ;td:"unrequested patron"
+            ;td:"unrequested delegate"
           ?>  ?=(%unknown status)
             ?:  ?=(%patron kind)
-              ;td:"unrequested patron {<timestamp>}"
-            ;td:"unrequested delegate {<timestamp>}"
+              ;td:"pending status patron"
+            ;td:"pending status delegate"
     ==
+  ::  XX in the above `?>` may lead to trouble since it's not exhaustive
   ::
   ++  valids-patrons
     ^-  (list manx)
@@ -617,7 +636,6 @@
     %+  skim  `(list [ship kind quest])`(sort ~(tap bi queries) dor)
     |=  [=ship =kind =quest]
     ?.  =(%patron kind)  |
-    ?~  ships.quest  |
     ?:(=(%unasked-for status.quest) & |)
   ::
   ++  unaskeds-delegates
@@ -627,7 +645,6 @@
     %+  skim  `(list [ship kind quest])`(sort ~(tap bi queries) dor)
     |=  [=ship =kind =quest]
     ?.  =(%delegate kind)  |
-    ?~  ships.quest  |
     ?:(=(%unasked-for status.quest) & |)
   ::
   ++  unknowns-patrons
@@ -637,7 +654,6 @@
     %+  skim  `(list [ship kind quest])`(sort ~(tap bi queries) dor)
     |=  [=ship =kind =quest]
     ?.  =(%patron kind)  |
-    ?~  ships.quest  |
     ?:(=(%unknown status.quest) & |)
   ::
   ++  unknowns-delegates
@@ -647,7 +663,6 @@
     %+  skim  `(list [ship kind quest])`(sort ~(tap bi queries) dor)
     |=  [=ship =kind =quest]
     ?.  =(%delegate kind)  |
-    ?~  ships.quest  |
     ?:(=(%unknown status.quest) & |)
   ::
   ++  sigil

@@ -194,14 +194,13 @@
 ++  arvo
   |=  [wire=(pole knot) =sign-arvo]
   ^+  that
-  ~&  >>  wire
   ?+    sign-arvo  ~|(%bad-arvo-sign that)
       [%eyre %bound *]
     that
     ::
       [%ames %tune *]
     =^  cards  state
-      ob-abet:(ob-agent-tune:(ob-abed:ob queries) +>:sign-arvo)
+      ob-abet:(ob-arvo-tune:(ob-abed:ob queries) +>:sign-arvo)
     (emil cards)
   ==
 ::
@@ -486,7 +485,7 @@
         ==
       (ob-emil new-cards)
     ==  ::  %emissary-query
-  ++  ob-agent-tune
+  ++  ob-arvo-tune
     |=  [[=ship =path] roar=(unit roar:ames)]
     ^+  ob
     ::  if no value then just post a cleared value
@@ -508,15 +507,19 @@
     ::   (~(put by queries) [%delegate trg] [?:(=(%.y +:data) %valid %rejected) now.bol])
     =/  tag  -.q:(need q.dat.u.roar)
     =/  data=?([%patrons p=(set ^ship)] [%delegates p=(set ^ship)])
-      ?:  =(%patrons tag)  ;;([%patrons p=(set ^ship)] [tag +:q:(need q.dat.u.roar)])
-      ?>  =(%delegates tag)  ;;([%delegates p=(set ^ship)] [tag +:q:(need q.dat.u.roar)])
+      ?:  =(%patrons tag)
+        =/  pats  q.dat.u.roar
+        ?~  pats  [%patrons *(set ^ship)]
+        ;;([%patrons p=(set ^ship)] [tag +:q.u.pats])
+      ?>  =(%delegates tag)
+        =/  dels  q.dat.u.roar
+        ?~  dels  [%delegates *(set ^ship)]
+        ;;([%delegates p=(set ^ship)] [tag +:q.u.dels])
     =/  ships  ~(tap in `(set ^ship)`p.data)
-    ~&  ships
     =?  queries  &(=(%patrons tag) (~(has bi queries) ship %patron))
       (~(put bi queries) ship %patron [%valid now.bol `p.data])
-    =?  queries  &(=(%delegate tag) (~(has bi queries) ship %delegate))
+    =?  queries  &(=(%delegates tag) (~(has bi queries) ship %delegate))
       (~(put bi queries) ship %delegate [%valid now.bol `p.data])
-    ~&  >>>  queries
     ob
   --  ::  observer core
 --
