@@ -186,7 +186,7 @@ a response to a marked scry.
 
 - `+accept` for a delegate to accept a patron.
 - `+designate` for a patron to request a delegate.
-- `+reject` for a delegate to refust a patron.
+- `+reject` for a delegate to refuse a patron.
 - `+revoke` for a patron to unrequest a delegate.
 
 ### `/app/emissary/webui/*`
@@ -200,8 +200,10 @@ a response to a marked scry.
 - `[1 1 0]` add support for remote scry; reorganize actions; adjust scry paths; add observer page
 - `[1 1 1]` adjust CSS
 - `[1 2 0]` hotfix remote scry on livenet; rework query data structure
+- `[1 3 0]` tombstone stale remote scry endpoints
 
 ### Planned Work
 
 - add observer library
 - add support for breach notifications
+- add QR code status check
