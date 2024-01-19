@@ -104,7 +104,8 @@
 ::
 ++  init
   ^+  that
-  (emil connect)
+  =/  keys  [%pass /jael/pubs %arvo %j %public-keys ~]
+  (emil [keys connect])
 ::
 ++  load
   |=  =old=vase
@@ -118,6 +119,7 @@
     that(state [%two patrons.old delegates.old requests.old *^queries])
       %two
     ~&  >  '%emissary loaded'
+    :: TODO check whether pubkeys already subbed
     that(state old)
   ==
 ::
@@ -202,6 +204,29 @@
     =^  cards  state
       ob-abet:(ob-arvo-tune:(ob-abed:ob queries) +>:sign-arvo)
     (emil cards)
+    ::
+      [%jael %public-keys *]
+    ?.  ?=(%breach -.public-keys-result.sign-arvo)
+      that
+    ::  someone breached
+    =/  =ship  who.public-keys-result.sign-arvo
+    ?:  ?&  (~(has in patrons) ship)
+            (~(has by delegates) ship)
+            (~(has in requests) ship)
+        ==
+      that
+    =.  that  (poke %emissary-trigger !>(`trigger`[%revoke ship]))
+    =.  that  (poke %emissary-decide !>(`decide`[%reject ship]))
+    =.  queries  (~(del by queries) ship)
+    =.  requests  (~(del in requests) ship)
+    %-  emil
+    ^-  (list card)
+    ?.  .^(? %gu /(scot %p our.bol)/hark/(scot %da now.bol)/$)  ~
+    =/  con=(list content:hark)  [[%ship ship] 'Breach notification received; removed from %emissary.' ~]
+    =/  =id:hark      (end 7 (shas %emissary-trigger eny.bol))
+    =/  =rope:hark    [~ ~ q.byk.bol /(scot %p ship)/[dap.bol]]
+    =/  =action:hark  [%add-yarn & & id rope now.bol con /[dap.bol] ~]
+    ~[[%pass /hark %agent [our.bol %hark] %poke %hark-action !>(action)]]
   ==
 ::
 ++  poke

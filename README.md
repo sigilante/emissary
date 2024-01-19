@@ -201,9 +201,9 @@ a response to a marked scry.
 - `[1 1 1]` adjust CSS
 - `[1 2 0]` hotfix remote scry on livenet; rework query data structure
 - `[1 3 0]` tombstone stale remote scry endpoints
+- `[1 4 0]` remove patrons and delegates on breach notification
 
 ### Planned Work
 
 - add observer library
-- add support for breach notifications
 - add QR code status check
