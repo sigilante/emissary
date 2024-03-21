@@ -629,14 +629,14 @@
     =.  queries  (~(put bi queries) +.que -.que *quest)
     ?-    -.que
         %patron
-      =/  new-cards
-        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//patrons] ::/(scot %p ship.que)]
+      =/  new-cards ::=(list card)
+        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%arvo %a `task:ames`[%keen `spar:ames`[ship.que /g/x/0/emissary//patrons]]]] ::/(scot %p ship.que)]
         ==
       (ob-emil new-cards)
       ::
         %delegate
-      =/  new-cards
-        :~  [%pass /emissary/fine/(scot %da now.bol) %arvo %a %keen ship.que /g/x/0/emissary//delegates] ::/(scot %p ship.que)]
+      =/  new-cards=(list card)
+        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%arvo %a `task:ames`[%keen `spar:ames`[ship.que /g/x/0/emissary//delegates]]]] ::/(scot %p ship.que)]
         ==
       (ob-emil new-cards)
     ==  ::  %emissary-query
