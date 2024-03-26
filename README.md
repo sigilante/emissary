@@ -202,6 +202,7 @@ a response to a marked scry.
 - `[1 2 0]` hotfix remote scry on livenet; rework query data structure
 - `[1 3 0]` tombstone stale remote scry endpoints
 - `[1 4 0]` remove patrons and delegates on breach notification
+- `[1 4 1]` bump to 411 K; modify remote scry task signatures
 
 ### Planned Work
 
