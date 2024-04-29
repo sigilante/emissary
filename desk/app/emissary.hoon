@@ -336,12 +336,10 @@
             ==
           ::  cull now-stale remote scry revisions
           =?    new-cards
-            ::  does /outgoing exist and have content?
-            ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /outgoing)
-                ?=([~ ^] (~(get by sky.bol) /outgoing))
-            ==
-            =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//outgoing) /outgoing]
-            [new-card new-cards]
+              ::  does /outgoing exist and have content?
+              ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing))
+            :_  new-cards
+            [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing) /outgoing]
           (pa-emil new-cards)
         ::  if still pending, then don't do anything
         ?>  =(%pending status)  pa
@@ -354,12 +352,10 @@
         ==
       ::  cull now-stale remote scry revisions
       =?    new-cards
-        ::  does /outgoing exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /outgoing)
-            ?=([~ ^] (~(get by sky.bol) /outgoing))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//outgoing) /outgoing]
-        [new-card new-cards]
+          ::  does /outgoing exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing) /outgoing]
       (pa-emil new-cards)
     ::
         %revoke
@@ -384,26 +380,20 @@
         ==
       ::  cull now-stale remote scry revisions
       =?    new-cards
-        ::  does /delegate/ship exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /delegate/(scot %p ship))
-            ?=([~ ^] (~(get by sky.bol) /delegate/(scot %p ship)))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//delegate/(scot %p ship)) /delegate/(scot %p ship)]
-        [new-card new-cards]
+          ::  does /delegate/ship exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegate/(scot %p ship)))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegate/(scot %p ship)) /delegate/(scot %p ship)]
       =?    new-cards
-        ::  does /delegates exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /delegates)
-            ?=([~ ^] (~(get by sky.bol) /delegates))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//delegates) /delegates]
-        [new-card new-cards]
+          ::  does /delegates exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegates))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegates) /delegates]
       =?    new-cards
-        ::  does /outgoing exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /outgoing)
-            ?=([~ ^] (~(get by sky.bol) /outgoing))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//outgoing) /outgoing]
-        [new-card new-cards]
+          ::  does /outgoing exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing) /outgoing]
       (pa-emil new-cards)
       ::
         %reject
@@ -415,26 +405,20 @@
         ==
       ::  cull now-stale remote scry revisions
       =?    new-cards
-        ::  does /delegate/ship exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /delegate/(scot %p ship))
-            ?=([~ ^] (~(get by sky.bol) /delegate/(scot %p ship)))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//delegate/(scot %p ship)) /delegate/(scot %p ship)]
-        [new-card new-cards]
+          ::  does /delegate/ship exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegate/(scot %p ship)))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegate/(scot %p ship)) /delegate/(scot %p ship)]
       =?    new-cards
-        ::  does /delegates exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /delegates)
-            ?=([~ ^] (~(get by sky.bol) /delegates))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//delegates) /delegates]
-        [new-card new-cards]
+          ::  does /delegates exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegates))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegates) /delegates]
       =?    new-cards
-        ::  does /outgoing exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /outgoing)
-            ?=([~ ^] (~(get by sky.bol) /outgoing))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//outgoing) /outgoing]
-        [new-card new-cards]
+          ::  does /outgoing exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing) /outgoing]
       (pa-emil new-cards)
     ==  ::  %emissary-response
   --  ::  patrons core
@@ -494,11 +478,9 @@
       ::  cull now-stale remote scry revisions
       =?    new-cards
         ::  does /incoming exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /incoming)
-            ?=([~ ^] (~(get by sky.bol) /incoming))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//incoming) /incoming]
-        [new-card new-cards]
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming) /incoming]
       (de-emil new-cards)
       ::
         %revoke
@@ -512,26 +494,20 @@
       ==
       ::  cull now-stale remote scry revisions
       =?    new-cards
-        ::  does /delegate/ship exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /patron/(scot %p ship))
-            ?=([~ ^] (~(get by sky.bol) /patron/(scot %p ship)))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//patron/(scot %p ship)) /patron/(scot %p ship)]
-        [new-card new-cards]
+          ::  does /patron/ship exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship)))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship)) /patron/(scot %p ship)]
       =?    new-cards
-        ::  does /delegates exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /patrons)
-            ?=([~ ^] (~(get by sky.bol) /patrons))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//patrons) /patrons]
-        [new-card new-cards]
+          ::  does /patrons exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons) /patrons]
       =?    new-cards
-        ::  does /outgoing exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /incoming)
-            ?=([~ ^] (~(get by sky.bol) /incoming))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//incoming) /incoming]
-        [new-card new-cards]
+          ::  does /incoming exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming) /incoming]
     (de-emil new-cards)
     ==  ::  %emissary-request
     ::
@@ -551,26 +527,20 @@
         ==
       ::  cull now-stale remote scry revisions
       =?    new-cards
-        ::  does /delegate/ship exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /patron/(scot %p ship.dec))
-            ?=([~ ^] (~(get by sky.bol) /patron/(scot %p ship.dec)))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//patron/(scot %p ship.dec)) /patron/(scot %p ship.dec)]
-        [new-card new-cards]
+          ::  does /patron/ship exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship.dec)))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship.dec)) /patron/(scot %p ship.dec)]
       =?    new-cards
-        ::  does /delegates exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /patrons)
-            ?=([~ ^] (~(get by sky.bol) /patrons))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//patrons) /patrons]
-        [new-card new-cards]
+          ::  does /patrons exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons) /patrons]
       =?    new-cards
-        ::  does /outgoing exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /incoming)
-            ?=([~ ^] (~(get by sky.bol) /incoming))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//incoming) /incoming]
-        [new-card new-cards]
+          ::  does /incoming exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming) /incoming]
       (de-emil (flop new-cards))
       ::
         %reject
@@ -585,26 +555,20 @@
         ==
       ::  cull now-stale remote scry revisions
       =?    new-cards
-        ::  does /delegate/ship exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /patron/(scot %p ship.dec))
-            ?=([~ ^] (~(get by sky.bol) /patron/(scot %p ship.dec)))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//patron/(scot %p ship.dec)) /patron/(scot %p ship.dec)]
-        [new-card new-cards]
+          ::  does /patron/ship exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship.dec)))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship.dec)) /patron/(scot %p ship.dec)]
       =?    new-cards
-        ::  does /delegates exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /patrons)
-            ?=([~ ^] (~(get by sky.bol) /patrons))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//patrons) /patrons]
-        [new-card new-cards]
+          ::  does /patrons exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons) /patrons]
       =?    new-cards
-        ::  does /outgoing exist and have content?
-        ?&  (~(has in `(set path)`(silt .^((list path) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)/$))) /incoming)
-            ?=([~ ^] (~(get by sky.bol) /incoming))
-        ==
-        =/  new-card=card  [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//incoming) /incoming]
-        [new-card new-cards]
+          ::  does /incoming exist and have content?
+          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming))
+        :_  new-cards
+        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming) /incoming]
       (de-emil (flop new-cards))
     ==  ::  %emissary-response
   --  ::  delegates core
@@ -630,13 +594,13 @@
     ?-    -.que
         %patron
       =/  new-cards ::=(list card)
-        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%arvo %a [%keen ~ `spar:ames`[ship.que /g/x/0/emissary//patrons]]]] ::/(scot %p ship.que)]
+        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%arvo %a [%keen ~ `spar:ames`[ship.que /g/x/0/emissary//1/patrons]]]] ::/(scot %p ship.que)]
         ==
       (ob-emil new-cards)
       ::
         %delegate
       =/  new-cards=(list card)
-        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%arvo %a [%keen ~ `spar:ames`[ship.que /g/x/0/emissary//delegates]]]] ::/(scot %p ship.que)]
+        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%arvo %a [%keen ~ `spar:ames`[ship.que /g/x/0/emissary//1/delegates]]]] ::/(scot %p ship.que)]
         ==
       (ob-emil new-cards)
     ==  ::  %emissary-query
