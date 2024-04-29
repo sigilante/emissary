@@ -203,6 +203,7 @@ a response to a marked scry.
 - `[1 3 0]` tombstone stale remote scry endpoints
 - `[1 4 0]` remove patrons and delegates on breach notification
 - `[1 4 1]` bump to 411 K; modify remote scry task signatures
+- `[1 4 2]` modify remote scries for 411K
 
 ### Planned Work
 
