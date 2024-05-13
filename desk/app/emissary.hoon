@@ -210,9 +210,10 @@
       that
     ::  someone breached
     =/  =ship  who.public-keys-result.sign-arvo
-    ?:  ?&  (~(has in patrons) ship)
+    ?.  ?|  (~(has in patrons) ship)
             (~(has by delegates) ship)
             (~(has in requests) ship)
+            (~(has by queries) ship)
         ==
       that
     =.  that  (poke %emissary-trigger !>(`trigger`[%revoke ship]))
@@ -222,7 +223,7 @@
     %-  emil
     ^-  (list card)
     ?.  .^(? %gu /(scot %p our.bol)/hark/(scot %da now.bol)/$)  ~
-    =/  con=(list content:hark)  [[%ship ship] 'Breach notification received; removed from %emissary.' ~]
+    =/  con=(list content:hark)  [[%ship ship] ' breached; removed from %emissary.' ~]
     =/  =id:hark      (end 7 (shas %emissary-trigger eny.bol))
     =/  =rope:hark    [~ ~ q.byk.bol /(scot %p ship)/[dap.bol]]
     =/  =action:hark  [%add-yarn & & id rope now.bol con /[dap.bol] ~]
