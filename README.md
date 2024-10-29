@@ -1,5 +1,7 @@
 #   `%emissary`
 
+**Status ~2024.10.29.  `%emissary` works for most applications but has occasional connectivity bugs via remote scry that have proven difficult to diagnose.**
+
 `%emissary` allows a running star to designate a planet as its representative.  (This is tied to operation not merely to ownership.)  The app is served at `/app/emissary`.
 
 `%emissary` allows app developers to permit delegate planets to exercise star-related powers and privileges.  It can be used for arrangements beyond this, however.
