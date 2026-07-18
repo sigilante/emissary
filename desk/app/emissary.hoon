@@ -255,6 +255,38 @@
   ::  pre-flop: +emil prepends without reversing, so +abet's flop
   ::  would otherwise emit these response cards in reverse order
   (emil (flop (response:schooner id status hed res)))
+::  +serve-octs: raw payload with exact length; schooner's as-octs
+::  would truncate binaries that end in zero bytes (both fonts do)
+::
+++  serve-octs
+  |=  [id=@ta typ=@t dat=octs]
+  ^+  that
+  %-  emil  %-  flop
+  %+  give-simple-payload:app:server  id
+  [[200 ~[['content-type' typ] ['cache-control' 'public, max-age=604800']]] `dat]
+::  +dash: serve the dashboard page out of clay
+::
+++  dash
+  |=  ord=order:rudder
+  ^+  that
+  ?.  authenticated.ord
+    (spout id.ord 303 ~ [%login-redirect url.request.ord])
+  %:  spout  id.ord  200  ~
+    :-  %html
+    .^(@t %cx /(scot %p our.bol)/[q.byk.bol]/(scot %da now.bol)/app/emissary/webui/dashboard/html)
+  ==
+::  +fnt: serve desk fonts
+::
+++  fnt
+  |=  [ord=order:rudder rest=(pole @t)]
+  ^+  that
+  =/  base=path  /(scot %p our.bol)/[q.byk.bol]/(scot %da now.bol)/fnt
+  ?+    rest  (spout id.ord 404 ~ [%plain "not found"])
+      [%urbit-sans ~]
+    (serve-octs id.ord 'font/woff2' .^(octs %cx (welp base /urbit-sans/woff2)))
+      [%space-mono ~]
+    (serve-octs id.ord 'font/ttf' .^(octs %cx (welp base /space-mono/ttf)))
+  ==
 ::  +api: /apps/emissary/api/v1 dispatch
 ::
 ++  api
@@ -481,6 +513,14 @@
     =/  lyn  (parse-request-line:server url.request.ord)
     ?:  =(~['apps' 'emissary' 'api' 'v1'] (scag 4 site.lyn))
       (api ord (slag 4 site.lyn))
+    ?:  =(~['apps' 'emissary' 'fnt'] (scag 3 site.lyn))
+      (fnt ord (slag 3 site.lyn))
+    ?:  ?&  =(%'GET' method.request.ord)
+            ?|  =(~['apps' 'emissary'] site.lyn)
+                ?&  =(~['apps' 'emissary' 'observer'] site.lyn)
+                    ?=(^ args.lyn)
+        ==  ==  ==
+      (dash ord)
     =;  out=(quip card _+.state)
       =.  +.state  +.out
       :: flop here so that the kick from rudder isn't first

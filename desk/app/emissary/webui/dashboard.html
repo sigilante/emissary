@@ -1,0 +1,902 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>%emissary</title>
+<style>
+@font-face{
+  font-family:'Urbit Sans';
+  src:url('/apps/emissary/fnt/urbit-sans.woff2') format('woff2');
+  font-weight:100 900;font-display:swap;
+}
+@font-face{
+  font-family:'Space Mono';
+  src:url('/apps/emissary/fnt/space-mono.ttf') format('truetype');
+  font-weight:400;font-display:swap;
+}
+:root{
+  --ground:#2f3019;
+  --ink:#f7f1d2;
+  --green:#5dbf8d;
+  --gold:#fed107;
+  --red:#f05826;
+  --mono:'Space Mono',ui-monospace,monospace;
+  --sans:'Urbit Sans',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:var(--ground)}
+body{
+  min-height:100vh;color:var(--ink);font-family:var(--sans);
+  background:
+    repeating-linear-gradient(0deg,rgba(247,241,210,.05) 0 1px,transparent 1px 154px),
+    repeating-linear-gradient(90deg,rgba(247,241,210,.05) 0 1px,transparent 1px 154px),
+    repeating-linear-gradient(0deg,rgba(247,241,210,.025) 0 1px,transparent 1px 28px),
+    repeating-linear-gradient(90deg,rgba(247,241,210,.025) 0 1px,transparent 1px 28px),
+    var(--ground);
+  padding:clamp(18px,3vw,40px);
+}
+main{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:26px}
+button{font-family:var(--sans);cursor:pointer;background:none;border:none;color:inherit}
+input{font-family:var(--mono);background:none;border:none;color:var(--ink);outline:none}
+input::placeholder{color:rgba(247,241,210,.35)}
+::selection{background:var(--gold);color:var(--ground)}
+
+/* ---------- header ---------- */
+header{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:18px;flex-wrap:wrap;
+  border-bottom:1px solid rgba(247,241,210,.28);padding-bottom:16px;
+}
+.wordmark{font-family:var(--mono);font-size:30px;line-height:1}
+.wordmark b{color:var(--gold);font-weight:400}
+.vtag{color:var(--gold);font-size:11px;font-family:var(--mono);margin-left:8px}
+.subtitle{
+  font-size:11px;text-transform:uppercase;letter-spacing:.22em;
+  color:rgba(247,241,210,.6);margin-top:8px;
+}
+.head-right{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.live{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--green)}
+.live.err{color:var(--red)}
+.live .dot{width:8px;height:8px;border-radius:50%;background:currentColor;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@media (prefers-reduced-motion: reduce){.live .dot{animation:none}}
+.idchip{
+  display:flex;align-items:center;gap:10px;border:1px solid rgba(247,241,210,.34);
+  padding:7px 12px;
+}
+.idchip .who{font-family:var(--mono);font-size:13px}
+.idchip .role{font-size:9.5px;text-transform:uppercase;letter-spacing:.18em;color:rgba(247,241,210,.6)}
+
+/* ---------- panel ---------- */
+.panel{
+  position:relative;border:1px solid rgba(247,241,210,.34);
+  padding:20px 22px 22px;background:rgba(247,241,210,.014);
+}
+.tick{position:absolute;width:13px;height:13px;border:2px solid var(--gold)}
+.tick.tl{top:-1px;left:-1px;border-right:none;border-bottom:none}
+.tick.tr{top:-1px;right:-1px;border-left:none;border-bottom:none}
+.tick.bl{bottom:-1px;left:-1px;border-right:none;border-top:none}
+.tick.br{bottom:-1px;right:-1px;border-left:none;border-top:none}
+.panel-head{
+  display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  border-bottom:1px solid rgba(247,241,210,.22);padding-bottom:10px;margin-bottom:16px;
+}
+.panel-title{font-size:12.5px;font-weight:500;text-transform:uppercase;letter-spacing:.24em}
+.panel-tag{font-family:var(--mono);font-size:10px;color:var(--gold)}
+
+/* ---------- sigils ---------- */
+.sig{display:block;image-rendering:auto;border:1px solid rgba(247,241,210,.25)}
+.sig-fallback{
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid rgba(247,241,210,.6);font-family:var(--mono);color:rgba(247,241,210,.7);
+}
+
+/* ---------- observer field ---------- */
+.querybar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:20px}
+.querybar .lab{font-family:var(--mono);font-size:11px;color:rgba(247,241,210,.6)}
+.underline{
+  display:flex;align-items:center;gap:2px;
+  border-bottom:1px solid rgba(247,241,210,.45);padding:4px 2px;
+}
+.underline .pfx{font-family:var(--mono);font-size:13px;color:rgba(247,241,210,.45)}
+.underline input{font-size:13px;width:14ch}
+.seg{display:flex;border:1px solid rgba(247,241,210,.4)}
+.seg button{
+  font-size:11px;text-transform:uppercase;letter-spacing:.12em;
+  padding:6px 12px;color:rgba(247,241,210,.7);
+}
+.seg button.on{background:var(--ink);color:var(--ground)}
+.btn{
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.16em;
+  padding:7px 16px;border:1px solid var(--gold);
+}
+.btn.solid{background:var(--gold);color:var(--ground)}
+.btn.solid:hover{background:transparent;color:var(--gold)}
+.btn.outline{color:var(--gold)}
+.btn.outline:hover{background:var(--gold);color:var(--ground)}
+.btn.dim{border-color:rgba(247,241,210,.4);color:rgba(247,241,210,.75);font-weight:400}
+.btn.dim:hover{background:rgba(247,241,210,.12)}
+.btn.good{border-color:var(--green);color:var(--green)}
+.btn.good:hover{background:var(--green);color:var(--ground)}
+.btn.bad{border-color:rgba(240,88,38,.75);color:var(--red)}
+.btn.bad:hover{background:var(--red);color:var(--ground)}
+.spacer{flex:1}
+.obs-body{display:flex;gap:26px;flex-wrap:wrap}
+.viz{flex:1 1 520px;min-width:0}
+.graph-wrap{position:relative;aspect-ratio:600/460;max-width:600px;margin:0 auto}
+.graph-wrap svg{position:absolute;inset:0;width:100%;height:100%}
+.gnode{
+  position:absolute;transform:translate(-50%,-50%);
+  display:flex;align-items:center;gap:6px;
+  background:var(--ground);border:1px solid var(--ink);padding:5px 8px;
+  font-family:var(--mono);font-size:10.5px;white-space:nowrap;
+}
+.hitline{cursor:pointer}
+.legend{
+  display:flex;gap:18px;flex-wrap:wrap;align-items:center;
+  border-top:1px dashed rgba(247,241,210,.28);margin-top:14px;padding-top:12px;
+  font-family:var(--mono);font-size:10px;color:rgba(247,241,210,.65);
+}
+.legend .sample{display:inline-flex;align-items:center;gap:6px}
+.matrix-wrap{overflow-x:auto;padding-top:64px}
+.matrix{border-collapse:collapse;font-family:var(--mono)}
+.matrix th{
+  font-size:9px;font-weight:400;color:rgba(247,241,210,.8);
+  height:20px;min-width:38px;position:relative;
+}
+.matrix th span{
+  position:absolute;bottom:6px;left:50%;
+  transform:rotate(-45deg);transform-origin:left bottom;white-space:nowrap;
+}
+.matrix .rowhead{font-size:9px;text-align:right;padding-right:8px;white-space:nowrap}
+.matrix td.cell{
+  width:38px;height:38px;text-align:center;font-size:13px;cursor:pointer;
+  border:1px solid rgba(247,241,210,.16);
+}
+.matrix td.diag{
+  cursor:default;
+  background:repeating-linear-gradient(45deg,transparent 0 4px,rgba(247,241,210,.12) 4px 5px);
+}
+.matrix td.sel{box-shadow:0 0 0 2px var(--gold) inset}
+.corner{font-size:8.5px;color:rgba(247,241,210,.5);text-align:right;padding-right:8px;white-space:nowrap}
+.drill{flex:1 1 300px;border-left:1px dashed rgba(247,241,210,.28);padding-left:26px;min-width:280px}
+.drill .dhead{font-family:var(--mono);font-size:10px;color:rgba(247,241,210,.55);margin-bottom:8px}
+.drill .dpair{font-family:var(--mono);font-size:16px;margin-bottom:16px}
+.drill .dpair b{color:var(--gold);font-weight:400}
+.verdict{
+  display:flex;align-items:center;gap:10px;
+  border:1.5px solid;padding:10px 12px;margin-bottom:8px;
+}
+.verdict .sw{width:12px;height:12px;background:currentColor}
+.verdict .vw{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.2em}
+.vdesc{font-size:12.5px;color:rgba(247,241,210,.85);margin-bottom:18px;line-height:1.5}
+.att{display:flex;gap:12px;margin-bottom:16px;align-items:flex-start}
+.att .mark{
+  width:26px;height:26px;flex:none;border:1px solid;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;
+}
+.att .claim{font-family:var(--mono);font-size:11.5px}
+.att .cap{font-size:9.5px;text-transform:uppercase;letter-spacing:.14em;color:rgba(247,241,210,.55);margin:2px 0}
+.att .sub{font-family:var(--mono);font-size:10.5px;color:rgba(247,241,210,.75);margin-top:2px}
+.att .keys{font-family:var(--mono);font-size:9.5px;color:rgba(247,241,210,.5);margin-top:4px}
+.att .keys .rift-bad{color:var(--red)}
+.att .act{margin-top:8px}
+.stale{color:var(--gold)}
+
+/* ---------- patron/delegate panels ---------- */
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px}
+.formrow{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.formrow .underline{flex:1;min-width:12ch}
+.formrow .underline input{width:100%}
+.seclab{
+  font-family:var(--mono);font-size:10px;color:rgba(247,241,210,.55);
+  text-transform:uppercase;letter-spacing:.14em;margin:14px 0 6px;
+}
+.rows{display:flex;flex-direction:column}
+.row{
+  display:flex;align-items:center;gap:10px;padding:10px 0;
+  border-bottom:1px solid rgba(247,241,210,.14);flex-wrap:wrap;
+}
+.row .who{font-family:var(--mono);font-size:12.5px}
+.badge{font-family:var(--mono);font-size:9px;color:rgba(247,241,210,.55);border:1px solid rgba(247,241,210,.22);padding:2px 6px}
+.badge .rift-bad{color:var(--red)}
+.chip{
+  font-size:9.5px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;
+  padding:3px 8px;border:1px solid;
+}
+.chip.valid{color:var(--green)}
+.chip.pending{color:var(--gold)}
+.chip.rejected{color:var(--red)}
+.rowact{margin-left:auto;display:flex;gap:8px}
+.rowact .btn{padding:4px 10px;font-size:10px}
+.empty{font-family:var(--mono);font-size:11px;color:rgba(247,241,210,.4);padding:12px 0}
+.verifyme{
+  width:100%;margin-top:16px;border:1px dashed rgba(247,241,210,.4);
+  color:rgba(247,241,210,.8);padding:10px;font-size:11px;
+  text-transform:uppercase;letter-spacing:.16em;
+}
+.verifyme:hover{border-color:var(--gold);color:var(--gold)}
+.qrbox{display:none;margin-top:14px;text-align:center}
+.qrbox.show{display:block}
+.qrbox canvas{background:var(--ink);padding:10px;max-width:180px;width:100%;image-rendering:pixelated}
+.qrlink{font-family:var(--mono);font-size:10.5px;color:var(--gold);word-break:break-all;margin-top:10px}
+.qrhint{font-size:10.5px;color:rgba(247,241,210,.55);margin-top:6px;line-height:1.5}
+
+/* ---------- footer / toast ---------- */
+footer{
+  text-align:center;font-family:var(--mono);font-size:10px;color:rgba(247,241,210,.4);
+  padding:6px 0 2px;
+}
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translate(-50%,10px);
+  background:var(--ground);border:1px solid var(--green);padding:10px 16px;
+  display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:12px;
+  opacity:0;pointer-events:none;transition:all .22s ease-out;
+  box-shadow:0 6px 22px rgba(0,0,0,.4);white-space:nowrap;max-width:90vw;
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast .dot{width:8px;height:8px;flex:none;background:var(--green)}
+#toast.gold{border-color:var(--gold)}  #toast.gold .dot{background:var(--gold)}
+#toast.red{border-color:var(--red)}    #toast.red .dot{background:var(--red)}
+@media (max-width:720px){
+  .drill{border-left:none;padding-left:0;border-top:1px dashed rgba(247,241,210,.28);padding-top:18px}
+}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <div class="wordmark"><b>%</b>emissary<span class="vtag">v1</span></div>
+      <div class="subtitle">Delegation &amp; remote-scry verification desk</div>
+    </div>
+    <div class="head-right">
+      <div class="live" id="live"><span class="dot"></span><span id="live-lab">CONNECTING</span></div>
+      <div class="idchip" id="idchip"></div>
+    </div>
+  </header>
+
+  <section class="panel">
+    <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+    <div class="panel-head">
+      <div class="panel-title">Observer · Verification Field</div>
+      <div class="panel-tag">OBS-01 / both-sides-agree</div>
+    </div>
+    <div class="querybar">
+      <span class="lab">SCRY →</span>
+      <span class="underline"><span class="pfx">~</span><input id="q-ship" placeholder="sampel-palnet" spellcheck="false"></span>
+      <span class="seg" id="q-kind">
+        <button data-k="delegate" class="on">delegates</button>
+        <button data-k="patron">patrons</button>
+      </span>
+      <button class="btn solid" id="q-run">Run scry</button>
+      <span class="spacer"></span>
+      <span class="seg" id="viewseg">
+        <button data-v="graph" class="on">graph</button>
+        <button data-v="matrix">matrix</button>
+      </span>
+    </div>
+    <div class="obs-body">
+      <div class="viz">
+        <div class="graph-wrap" id="graph"></div>
+        <div class="matrix-wrap" id="matrix" style="display:none"></div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="drill" id="drill"></div>
+    </div>
+  </section>
+
+  <div class="cols">
+    <section class="panel">
+      <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+      <div class="panel-head">
+        <div class="panel-title">Patron · Your Delegates</div>
+        <div class="panel-tag">PAT-02</div>
+      </div>
+      <div class="formrow">
+        <span class="underline"><span class="pfx">~</span><input id="desig" placeholder="designate a ship…" spellcheck="false"></span>
+        <button class="btn outline" id="desig-go">Designate</button>
+      </div>
+      <div class="rows" id="delegate-rows"></div>
+      <button class="verifyme" id="verifyme">⧉ Verify me — share / QR</button>
+      <div class="qrbox" id="qrbox">
+        <canvas id="qrcanvas" width="0" height="0"></canvas>
+        <div class="qrlink" id="qrlink"></div>
+        <div class="qrhint">any ship's dashboard can scan this and verify against its own session.</div>
+      </div>
+    </section>
+    <section class="panel">
+      <span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span>
+      <div class="panel-head">
+        <div class="panel-title">Delegate · Incoming &amp; Patrons</div>
+        <div class="panel-tag">DEL-03</div>
+      </div>
+      <div class="seclab">Incoming designation requests</div>
+      <div class="rows" id="incoming-rows"></div>
+      <div class="seclab">Ships you represent</div>
+      <div class="rows" id="patron-rows"></div>
+    </section>
+  </div>
+
+  <footer>/apps/emissary/api/v1 · session-authenticated · updates stream on /web/state · re-subscribe on quit</footer>
+</main>
+<div id="toast"><span class="dot"></span><span id="toast-msg"></span></div>
+
+<script>
+'use strict';
+/* ============================================================
+   %emissary dashboard — hand-rolled client for /apps/emissary/api/v1
+   ============================================================ */
+const API = '/apps/emissary/api/v1';
+const COLORS = {verified:'#5dbf8d', unconfirmed:'#fed107', conflict:'#f05826', none:'rgba(247,241,210,.55)'};
+const STALE_MS = 3600*1000;
+
+/* ---------- tiny dom helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- ui state ---------- */
+const UI = {
+  view:'graph', qKind:'delegate', sel:null,      // sel = {p, x}
+  showQR:false, connected:false, doc:null,
+};
+
+/* ---------- ship utilities ---------- */
+const clean = p => String(p||'').trim().replace(/^~+/,'').toLowerCase();
+const sig   = p => '~'+clean(p);
+function clanOf(p){
+  const parts = clean(p).split('-').filter(Boolean);
+  if(parts.length===1) return parts[0].length<=3 ? 'galaxy' : 'star';
+  if(parts.length===2) return 'planet';
+  if(parts.length<=4)  return 'moon';
+  return 'comet';
+}
+function sigilImg(ship, size){
+  const s = esc(sig(ship));
+  return `<img class="sig" width="${size}" height="${size}" alt="${s}" `+
+         `src="${API}/sigil/${encodeURIComponent(sig(ship))}.svg" `+
+         `onerror="this.outerHTML='<span class=&quot;sig-fallback&quot; style=&quot;width:${size}px;height:${size}px;font-size:${Math.floor(size*.38)}px&quot;>${s.slice(1,3)}</span>'">`;
+}
+function keysOf(ship){
+  const k = (UI.doc && UI.doc.keys && UI.doc.keys[sig(ship)]) || null;
+  return k ? {life:k.life, rift:k.rift} : {life:0, rift:0};
+}
+function keysLine(ship){
+  const k = keysOf(ship);
+  const r = k.rift>0 ? `<span class="rift-bad">rift ${k.rift}</span>` : `rift ${k.rift}`;
+  return `${esc(sig(ship))} keys · life ${k.life} · ${r}`;
+}
+function badge(ship){
+  const k = keysOf(ship);
+  const r = k.rift>0 ? `<span class="rift-bad">rift ${k.rift}</span>` : `rift ${k.rift}`;
+  return `<span class="badge">life ${k.life} · ${r}</span>`;
+}
+function ago(iso){
+  if(!iso) return '';
+  const ms = Date.now() - Date.parse(iso);
+  if(ms < 60e3)   return 'just now';
+  if(ms < 3600e3) return Math.floor(ms/60e3)+'m ago';
+  if(ms < 86400e3)return Math.floor(ms/3600e3)+'h ago';
+  return Math.floor(ms/86400e3)+'d ago';
+}
+const isStale = iso => iso && (Date.now()-Date.parse(iso)) > STALE_MS;
+
+/* ---------- verification logic (the core rule) ---------- */
+/* effective queries: observer answers + this ship's own local state
+   as a synthetic self-attestation                                   */
+function effQueries(){
+  const d = UI.doc; if(!d) return {};
+  const eq = {};
+  for(const [ship,qs] of Object.entries(d.queries||{})){
+    eq[ship] = {};
+    for(const [kind,q] of Object.entries(qs)) eq[ship][kind] = {...q, self:false};
+  }
+  const me = d.ship;
+  const mine = eq[me] = eq[me] || {};
+  const validDels = Object.entries(d.delegates||{}).filter(([,s])=>s==='valid').map(([s])=>s);
+  mine.delegate = {status:'valid', timestamp:null, ships:validDels, self:true};
+  mine.patron   = {status:'valid', timestamp:null, ships:(d.patrons||[]), self:true};
+  return eq;
+}
+/* one side's stance on a claim: does `who` attest `kind`-membership of `member`? */
+function side(eq, who, kind, member){
+  const q = eq[sig(who)] && eq[sig(who)][kind];
+  if(!q)                       return {a:'none',    q:null};   // never queried
+  if(q.status==='unknown')     return {a:'unknown', q};        // in flight
+  if(q.status==='unasked-for') return {a:'no',      q};        // answered: nothing bound
+  const has = (q.ships||[]).map(clean).includes(clean(member));
+  return {a: has?'yes':'no', q};
+}
+/* full claim state for "X is a delegate of P" */
+function claim(eq, P, X){
+  const pS = side(eq, P, 'delegate', X);   // patron-side: P's delegate set
+  const xS = side(eq, X, 'patron',   P);   // delegate-side: X's patron set
+  let state = 'none';
+  if(pS.a==='yes' && xS.a==='yes')                          state='verified';
+  else if((pS.a==='yes'&&xS.a==='no')||(xS.a==='yes'&&pS.a==='no')) state='conflict';
+  else if(pS.a==='yes' || xS.a==='yes')                     state='unconfirmed';
+  return {state, pS, xS};
+}
+/* the axis of ships in the observer field */
+function shipAxis(eq){
+  const set = new Set();
+  for(const [ship,qs] of Object.entries(eq)){
+    set.add(clean(ship));
+    for(const q of Object.values(qs)) (q.ships||[]).forEach(s=>set.add(clean(s)));
+  }
+  return [...set].sort();
+}
+/* all drawable edges (patron → delegate) */
+function edges(eq, axis){
+  const out = [];
+  for(const p of axis) for(const x of axis){
+    if(p===x) continue;
+    const c = claim(eq, p, x);
+    if(c.state!=='none') out.push({p, x, ...c});
+  }
+  return out;
+}
+
+/* ---------- api ---------- */
+async function getState(){
+  const r = await fetch(`${API}/state`, {credentials:'same-origin'});
+  if(!r.ok) throw new Error('state fetch failed: '+r.status);
+  return r.json();
+}
+async function postAction(act, body){
+  const r = await fetch(`${API}/action`, {
+    method:'POST', credentials:'same-origin',
+    body: JSON.stringify({[act]: body}),
+  });
+  if(!r.ok){ toast(`${act} failed (${r.status})`, 'red'); return false; }
+  return true;
+}
+
+/* ---------- channel (eyre) ---------- */
+let CH = {uid:null, es:null, msgId:0, retry:0};
+async function channelOpen(shipName){
+  CH.uid = `${Date.now()}-${Math.random().toString(16).slice(2,8)}`;
+  const url = `/~/channel/emissary-${CH.uid}`;
+  const sub = [{id:++CH.msgId, action:'subscribe', ship:shipName, app:'emissary', path:'/web/state'}];
+  const r = await fetch(url, {method:'PUT', credentials:'same-origin', body:JSON.stringify(sub)});
+  if(!r.ok) throw new Error('subscribe failed: '+r.status);
+  CH.es = new EventSource(url);
+  CH.es.onmessage = ev=>{
+    CH.retry = 0;
+    setLive(true);
+    let dat; try{ dat = JSON.parse(ev.data); }catch(e){ return; }
+    fetch(url, {method:'PUT', credentials:'same-origin',
+      body:JSON.stringify([{id:++CH.msgId, action:'ack', 'event-id':Number(ev.lastEventId)}])});
+    if(dat.response==='diff' && dat.json) applyDoc(dat.json);
+    if(dat.response==='quit') channelReconnect();
+  };
+  CH.es.onerror = ()=> channelReconnect();
+}
+function channelReconnect(){
+  if(CH.es){ CH.es.close(); CH.es = null; }
+  setLive(false);
+  const wait = Math.min(15000, 1000*Math.pow(2, CH.retry++));
+  setTimeout(async ()=>{
+    try{
+      const doc = await getState();
+      applyDoc(doc);
+      await channelOpen(clean(doc.ship));
+    }catch(e){ channelReconnect(); }
+  }, wait);
+}
+function setLive(ok){
+  UI.connected = ok;
+  const el = $('#live');
+  el.classList.toggle('err', !ok);
+  $('#live-lab').textContent = ok ? 'LIVE · /web/state' : 'RECONNECTING';
+}
+
+/* ---------- toast ---------- */
+let toastTimer = null;
+function toast(msg, color){
+  const t = $('#toast');
+  t.className = color ? color : '';
+  $('#toast-msg').textContent = msg;
+  requestAnimationFrame(()=>t.classList.add('show'));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3400);
+}
+
+/* ---------- rendering ---------- */
+function applyDoc(doc){
+  const prevIncoming = UI.doc ? (UI.doc.incoming||[]).length : null;
+  UI.doc = doc;
+  if(prevIncoming!==null && (doc.incoming||[]).length > prevIncoming)
+    toast(`incoming designation request`, 'gold');
+  render();
+}
+function render(){
+  if(!UI.doc) return;
+  renderHeader(); renderObserver(); renderPatron(); renderDelegate();
+}
+function renderHeader(){
+  const me = UI.doc.ship;
+  $('#idchip').innerHTML =
+    `${sigilImg(me,30)}<div><div class="who">${esc(me)}</div>`+
+    `<div class="role">This ship · ${clanOf(me)}</div></div>`;
+}
+
+/* ----- observer field ----- */
+function renderObserver(){
+  const eq   = effQueries();
+  const axis = shipAxis(eq);
+  const eds  = edges(eq, axis);
+  // keep / default selection
+  if(UI.sel && !eds.some(e=>e.p===UI.sel.p && e.x===UI.sel.x)) UI.sel = null;
+  if(!UI.sel && eds.length){
+    const c = eds.find(e=>e.state==='conflict');
+    UI.sel = c ? {p:c.p, x:c.x} : {p:eds[0].p, x:eds[0].x};
+  }
+  $('#graph').style.display  = UI.view==='graph'  ? '' : 'none';
+  $('#matrix').style.display = UI.view==='matrix' ? '' : 'none';
+  if(UI.view==='graph') renderGraph(axis, eds); else renderMatrix(eq, axis);
+  renderLegend();
+  renderDrill(eq);
+}
+function nodePos(axis){
+  const cx=300, cy=220, r=165, pos={};
+  axis.forEach((s,i)=>{
+    const th = (i/axis.length)*2*Math.PI - Math.PI/2;
+    pos[s] = [cx + r*Math.cos(th), cy + r*Math.sin(th)];
+  });
+  return pos;
+}
+function renderGraph(axis, eds){
+  const pos = nodePos(axis);
+  let svg = '';
+  for(const e of eds){
+    const [x1,y1] = pos[e.p], [x2,y2] = pos[e.x];
+    const dx=x2-x1, dy=y2-y1, len=Math.hypot(dx,dy)||1;
+    const ux=dx/len, uy=dy/len;
+    // pull endpoints in from node centers; offset opposite-direction pairs
+    let ox=0, oy=0;
+    if(eds.some(o=>o.p===e.x && o.x===e.p)){ ox = -uy*6; oy = ux*6; }
+    const ax=x1+ux*44+ox, ay=y1+uy*44+oy, bx=x2-ux*44+ox, by=y2-uy*44+oy;
+    const col = COLORS[e.state];
+    const seld = UI.sel && UI.sel.p===e.p && UI.sel.x===e.x;
+    const w = (e.state==='conflict'?3.2:e.state==='verified'?2.4:1.8) + (seld?1.2:0);
+    const dash = e.state==='unconfirmed' ? 'stroke-dasharray="6 5"' : '';
+    if(seld) svg += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="rgba(254,209,7,.35)" stroke-width="10"/>`;
+    svg += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="${col}" stroke-width="${w}" ${dash}/>`;
+    svg += `<rect x="${ax-3.5}" y="${ay-3.5}" width="7" height="7" fill="#2f3019" stroke="${col}" stroke-width="1.5"/>`;
+    svg += `<circle cx="${bx}" cy="${by}" r="3.2" fill="${col}"/>`;
+    svg += `<line class="hitline" x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="transparent" stroke-width="16" data-p="${esc(e.p)}" data-x="${esc(e.x)}"/>`;
+  }
+  let nodes = '';
+  for(const s of axis){
+    const [x,y] = pos[s];
+    nodes += `<div class="gnode" style="left:${x/600*100}%;top:${y/460*100}%">${sigilImg(s,20)}${esc(sig(s))}</div>`;
+  }
+  $('#graph').innerHTML = `<svg viewBox="0 0 600 460" preserveAspectRatio="xMidYMid meet">${svg}</svg>${nodes}`;
+  $('#graph').querySelectorAll('.hitline').forEach(l=>{
+    l.addEventListener('click', ()=>{ UI.sel={p:l.dataset.p, x:l.dataset.x}; renderObserver(); });
+  });
+}
+function renderMatrix(eq, axis){
+  let html = '<table class="matrix"><tr><td class="corner">delegate →<br>patron ↓</td>';
+  for(const x of axis) html += `<th><span>${esc(sig(x))}</span></th>`;
+  html += '</tr>';
+  for(const p of axis){
+    html += `<tr><td class="rowhead">${esc(sig(p))}</td>`;
+    for(const x of axis){
+      if(p===x){ html += '<td class="cell diag"></td>'; continue; }
+      const c = claim(eq, p, x);
+      const seld = UI.sel && UI.sel.p===p && UI.sel.x===x;
+      const glyph = {verified:'✓', unconfirmed:'~', conflict:'✕', none:'·'}[c.state];
+      const col   = COLORS[c.state];
+      const bord  = c.state==='conflict' ? `border:2px solid ${col};`
+                  : c.state==='unconfirmed' ? `border:1px dashed ${col};` : '';
+      html += `<td class="cell${seld?' sel':''}" style="color:${col};${bord}" data-p="${esc(p)}" data-x="${esc(x)}">${glyph}</td>`;
+    }
+    html += '</tr>';
+  }
+  html += '</table>';
+  $('#matrix').innerHTML = html;
+  $('#matrix').querySelectorAll('td.cell:not(.diag)').forEach(td=>{
+    td.addEventListener('click', ()=>{ UI.sel={p:td.dataset.p, x:td.dataset.x}; renderObserver(); });
+  });
+}
+function renderLegend(){
+  $('#legend').innerHTML =
+    `<span class="sample"><svg width="30" height="6"><line x1="0" y1="3" x2="30" y2="3" stroke="${COLORS.verified}" stroke-width="2.4"/></svg>verified</span>`+
+    `<span class="sample"><svg width="30" height="6"><line x1="0" y1="3" x2="30" y2="3" stroke="${COLORS.unconfirmed}" stroke-width="1.8" stroke-dasharray="6 5"/></svg>unconfirmed</span>`+
+    `<span class="sample"><svg width="30" height="6"><line x1="0" y1="3" x2="30" y2="3" stroke="${COLORS.conflict}" stroke-width="3.2"/></svg>conflict</span>`+
+    `<span class="sample"><svg width="12" height="12"><rect x="2" y="2" width="7" height="7" fill="none" stroke="rgba(247,241,210,.8)" stroke-width="1.5"/></svg>patron</span>`+
+    `<span class="sample"><svg width="12" height="12"><circle cx="6" cy="6" r="3.2" fill="rgba(247,241,210,.8)"/></svg>delegate</span>`;
+}
+function attestRow(who, kind, member, s, roleCap){
+  const self = s.q && s.q.self;
+  let mark, sub, act='';
+  if(s.a==='yes'){
+    mark = ['✓', COLORS.verified];
+    sub  = self ? 'attests · local state'
+                : `attests · ${ago(s.q.timestamp)}`+(isStale(s.q.timestamp)?' · <span class="stale">STALE — re-query</span>':'');
+  }else if(s.a==='no'){
+    mark = ['✕', COLORS.conflict];
+    sub  = self ? 'local state — no such binding'
+                : `answered — no such binding · ${ago(s.q.timestamp)}`+(isStale(s.q.timestamp)?' · <span class="stale">STALE</span>':'');
+  }else if(s.a==='unknown'){
+    mark = ['?', COLORS.unconfirmed];
+    sub  = 'scry in flight… (first contact can take ~30s)';
+  }else{
+    mark = ['?', 'rgba(247,241,210,.5)'];
+    sub  = 'not queried yet';
+  }
+  if(!self && s.a!=='yes' && s.a!=='unknown')
+    act = `<div class="act"><button class="btn dim att-scry" data-ship="${esc(who)}" data-kind="${kind}">scry ${esc(sig(who))} ▸ ${kind}s</button></div>`;
+  return `<div class="att">
+    <div class="mark" style="color:${mark[1]};border-color:${mark[1]}">${mark[0]}</div>
+    <div>
+      <div class="claim">${esc(sig(who))} · ${kind==='delegate'?'delegates include':'patrons include'} ${esc(sig(member))}</div>
+      <div class="cap">${roleCap}</div>
+      <div class="sub">${sub}</div>
+      <div class="keys">${keysLine(who)}</div>
+      ${act}
+    </div>
+  </div>`;
+}
+function renderDrill(eq){
+  const d = $('#drill');
+  if(!UI.sel){
+    d.innerHTML = `<div class="dhead">SELECTED BINDING</div>
+      <div class="empty">run a scry, then select an edge or cell to inspect a binding.</div>`;
+    return;
+  }
+  const {p, x} = UI.sel;
+  const c = claim(eq, p, x);
+  const col = COLORS[c.state];
+  const kp = keysOf(p), kx = keysOf(x);
+  const breached = (kp.rift>0 && sig(p)) || (kx.rift>0 && sig(x));
+  const desc = {
+    verified:   `both sides attest: ${esc(sig(p))} names ${esc(sig(x))} a delegate, and ${esc(sig(x))} names ${esc(sig(p))} a patron.`,
+    unconfirmed:`one side attests; the other has not answered. scry the missing side to complete verification.`,
+    conflict:   `the attestations disagree — one side answered without the counterpart.`+
+                (breached?` note: ${esc(breached)} has breached (rift bumped), which invalidates older attestations.`:''),
+    none:       `neither side attests this binding.`,
+  }[c.state];
+  d.innerHTML = `
+    <div class="dhead">SELECTED BINDING</div>
+    <div class="dpair">${esc(sig(p))} <b>▸</b> ${esc(sig(x))}</div>
+    <div class="verdict" style="color:${col};border-color:${col}">
+      <span class="sw"></span><span class="vw">${c.state}</span>
+    </div>
+    <div class="vdesc">${desc}</div>
+    ${attestRow(p, 'delegate', x, c.pS, 'patron side')}
+    ${attestRow(x, 'patron',   p, c.xS, 'delegate side')}`;
+  d.querySelectorAll('.att-scry').forEach(b=>{
+    b.addEventListener('click', ()=> runQuery(b.dataset.kind, b.dataset.ship));
+  });
+}
+
+/* ----- patron / delegate panels ----- */
+function renderPatron(){
+  const dels = Object.entries(UI.doc.delegates||{});
+  $('#delegate-rows').innerHTML = !dels.length
+    ? '<div class="empty">no delegates designated.</div>'
+    : dels.map(([s,st])=>`
+      <div class="row">${sigilImg(s,26)}<span class="who">${esc(sig(s))}</span>${badge(s)}
+        <span class="chip ${st}">${st}</span>
+        <span class="rowact"><button class="btn bad act-revoke" data-ship="${esc(s)}">revoke</button></span>
+      </div>`).join('');
+  document.querySelectorAll('.act-revoke').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const s = b.dataset.ship;
+      delete UI.doc.delegates[s]; render();
+      if(await postAction('revoke', {ship:sig(s)})) toast(`revoked ${sig(s)}`);
+    });
+  });
+  // verify-me
+  const me = UI.doc.ship;
+  const link = `/apps/emissary/observer?who=${encodeURIComponent(me)}&what=delegates`;
+  $('#qrlink').textContent = link;
+  if(UI.showQR) drawQR(location.origin + link);
+  $('#qrbox').classList.toggle('show', UI.showQR);
+}
+function renderDelegate(){
+  const inc = UI.doc.incoming||[];
+  $('#incoming-rows').innerHTML = !inc.length
+    ? '<div class="empty">no pending requests.</div>'
+    : inc.map(s=>`
+      <div class="row">${sigilImg(s,26)}<span class="who">${esc(sig(s))}</span>${badge(s)}
+        <span class="rowact">
+          <button class="btn good act-accept" data-ship="${esc(s)}">accept</button>
+          <button class="btn bad act-reject" data-ship="${esc(s)}">reject</button>
+        </span>
+      </div>`).join('');
+  const pats = UI.doc.patrons||[];
+  $('#patron-rows').innerHTML = !pats.length
+    ? '<div class="empty">no patrons.</div>'
+    : pats.map(s=>`
+      <div class="row">${sigilImg(s,26)}<span class="who">${esc(sig(s))}</span>${badge(s)}
+        <span class="rowact"><span class="chip valid">patron</span></span>
+      </div>`).join('');
+  document.querySelectorAll('.act-accept').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const s = b.dataset.ship;
+      UI.doc.incoming = (UI.doc.incoming||[]).filter(v=>clean(v)!==clean(s));
+      (UI.doc.patrons=UI.doc.patrons||[]).push(sig(s)); render();
+      if(await postAction('accept', {ship:sig(s)})) toast(`accepted ${sig(s)} as patron`);
+    });
+  });
+  document.querySelectorAll('.act-reject').forEach(b=>{
+    b.addEventListener('click', async ()=>{
+      const s = b.dataset.ship;
+      UI.doc.incoming = (UI.doc.incoming||[]).filter(v=>clean(v)!==clean(s)); render();
+      if(await postAction('reject', {ship:sig(s)})) toast(`rejected ${sig(s)}`, 'red');
+    });
+  });
+}
+
+/* ---------- actions ---------- */
+async function runQuery(kind, ship){
+  const s = clean(ship);
+  if(!s){ toast('enter a ship to scry', 'red'); return; }
+  UI.doc.queries = UI.doc.queries||{};
+  const qs = UI.doc.queries[sig(s)] = UI.doc.queries[sig(s)]||{};
+  qs[kind] = {status:'unknown', timestamp:null, ships:null};
+  render();
+  if(await postAction('query', {kind, ship:sig(s)}))
+    toast(`scrying ${sig(s)} for ${kind}s…`, 'gold');
+}
+async function runDesignate(){
+  const s = clean($('#desig').value);
+  if(!s){ toast('enter a ship to designate', 'red'); return; }
+  (UI.doc.delegates=UI.doc.delegates||{})[sig(s)] = 'pending';
+  $('#desig').value = ''; render();
+  if(await postAction('designate', {ship:sig(s)})) toast(`designation sent to ${sig(s)}`, 'gold');
+}
+
+/* ---------- QR (byte mode, EC level L, mask 0, versions 1-5) ---------- */
+function drawQR(text){
+  const cv = $('#qrcanvas');
+  const m = qrModules(text);
+  if(!m){ cv.style.display='none'; return; }
+  cv.style.display='';
+  const n = m.length, Q = 4, S = 4;
+  cv.width = cv.height = (n+2*Q)*S;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#f7f1d2'; g.fillRect(0,0,cv.width,cv.height);
+  g.fillStyle = '#2f3019';
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++)
+    if(m[r][c]) g.fillRect((c+Q)*S,(r+Q)*S,S,S);
+}
+function qrModules(text){
+  const data = new TextEncoder().encode(text);
+  const CAP  = [0,17,32,53,78,106];
+  const ECW  = [0,7,10,15,20,26];
+  const TOT  = [0,26,44,70,100,134];
+  const ALIGN= [[],[],[6,18],[6,22],[6,26],[6,30]];
+  let v=1; while(v<=5 && CAP[v]<data.length) v++;
+  if(v>5) return null;
+  const dataCW = TOT[v]-ECW[v];
+  // -- bitstream --> data codewords
+  const bits=[]; const push=(val,n)=>{ for(let i=n-1;i>=0;i--) bits.push((val>>i)&1); };
+  push(4,4); push(data.length,8); data.forEach(b=>push(b,8));
+  for(let i=0;i<4 && bits.length<dataCW*8;i++) bits.push(0);
+  while(bits.length%8) bits.push(0);
+  const cws=[];
+  for(let i=0;i<bits.length;i+=8){ let b=0; for(let j=0;j<8;j++) b=(b<<1)|bits[i+j]; cws.push(b); }
+  const PADS=[236,17]; let pi=0;
+  while(cws.length<dataCW) cws.push(PADS[pi++%2]);
+  // -- GF(256) tables --
+  const EXP=new Array(512), LOG=new Array(256);
+  for(let i=0,x=1;i<255;i++){ EXP[i]=x; LOG[x]=i; x<<=1; if(x&256) x^=285; }
+  for(let i=255;i<512;i++) EXP[i]=EXP[i-255];
+  const mul=(a,b)=>(a&&b)?EXP[LOG[a]+LOG[b]]:0;
+  // -- generator polynomial (monic, G = coeffs below leading, len E) --
+  const E=ECW[v]; let G=[];
+  for(let k=0;k<E;k++){
+    const a=EXP[k], NG=new Array(G.length+1);
+    for(let i=0;i<=G.length;i++){
+      const gi   = i<G.length ? G[i] : 0;
+      const gim1 = i===0 ? 1 : G[i-1];
+      NG[i] = gi ^ mul(a,gim1);
+    }
+    G=NG;
+  }
+  // -- remainder via LFSR --
+  const R=new Array(E).fill(0);
+  for(const c of cws){
+    const f=c^R[0]; R.shift(); R.push(0);
+    if(f) for(let i=0;i<E;i++) R[i]^=mul(G[i],f);
+  }
+  const all=cws.concat(R);
+  // -- module matrix --
+  const n=17+4*v;
+  const M=Array.from({length:n},()=>new Array(n).fill(null));  // null = free
+  const setf=(r,c,val)=>{ if(r>=0&&r<n&&c>=0&&c<n) M[r][c]=val; };
+  const finder=(r,c)=>{
+    for(let i=-1;i<=7;i++) for(let j=-1;j<=7;j++){
+      const rr=r+i, cc=c+j;
+      if(rr<0||rr>=n||cc<0||cc>=n) continue;
+      const on = i>=0&&i<=6&&j>=0&&j<=6 &&
+                 (i===0||i===6||j===0||j===6||(i>=2&&i<=4&&j>=2&&j<=4));
+      M[rr][cc]=on?1:0;
+    }
+  };
+  finder(0,0); finder(0,n-7); finder(n-7,0);
+  for(let i=8;i<n-8;i++){ if(M[6][i]===null) M[6][i]=(i%2===0)?1:0; if(M[i][6]===null) M[i][6]=(i%2===0)?1:0; }
+  for(const r of ALIGN[v]) for(const c of ALIGN[v]){
+    if(M[r][c]!==null) continue;                  // overlaps finder
+    for(let i=-2;i<=2;i++) for(let j=-2;j<=2;j++)
+      setf(r+i,c+j,(Math.max(Math.abs(i),Math.abs(j))!==1)?1:0);
+  }
+  M[n-8][8]=1;                                    // dark module
+  // format info areas: EC L + mask 0 = 111011111000100
+  const F='111011111000100'.split('').map(Number);
+  for(let i=0;i<6;i++)  M[8][i]=F[i];
+  M[8][7]=F[6]; M[8][8]=F[7]; M[7][8]=F[8];
+  for(let i=9;i<15;i++) M[14-i][8]=F[i];
+  for(let i=0;i<7;i++)  M[n-1-i][8]=F[i];
+  for(let i=7;i<15;i++) M[8][n-15+i]=F[i];
+  // -- place data, zigzag, mask 0: (r+c)%2===0 flips --
+  let bi=0;
+  const bitAt=k=>{ const cw=all[k>>3]; return cw===undefined?0:(cw>>(7-(k&7)))&1; };
+  let col=n-1, up=true;
+  while(col>0){
+    if(col===6) col--;
+    for(let k=0;k<n;k++){
+      const r = up ? n-1-k : k;
+      for(const c of [col,col-1]){
+        if(M[r][c]!==null) continue;
+        let b=bitAt(bi++);
+        if((r+c)%2===0) b^=1;
+        M[r][c]=b;
+      }
+    }
+    up=!up; col-=2;
+  }
+  return M;
+}
+
+/* ---------- boot ---------- */
+function wire(){
+  $('#q-run').addEventListener('click', ()=>runQuery(UI.qKind, $('#q-ship').value));
+  $('#q-ship').addEventListener('keydown', e=>{ if(e.key==='Enter') runQuery(UI.qKind, $('#q-ship').value); });
+  $('#q-kind').querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      UI.qKind=b.dataset.k;
+      $('#q-kind').querySelectorAll('button').forEach(o=>o.classList.toggle('on',o===b));
+    });
+  });
+  $('#viewseg').querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      UI.view=b.dataset.v;
+      $('#viewseg').querySelectorAll('button').forEach(o=>o.classList.toggle('on',o===b));
+      renderObserver();
+    });
+  });
+  $('#desig-go').addEventListener('click', runDesignate);
+  $('#desig').addEventListener('keydown', e=>{ if(e.key==='Enter') runDesignate(); });
+  $('#verifyme').addEventListener('click', ()=>{ UI.showQR=!UI.showQR; renderPatron(); });
+}
+async function boot(){
+  wire();
+  try{
+    const doc = await getState();
+    applyDoc(doc);
+    channelOpen(clean(doc.ship)).catch(()=>channelReconnect());
+  }catch(e){
+    toast('failed to load state — are you logged in?', 'red');
+    setLive(false);
+    return;
+  }
+  // deep link: /apps/emissary/observer?who=~x&what=delegates|patrons
+  const qp = new URLSearchParams(location.search);
+  if(qp.get('who')){
+    const kind = qp.get('what')==='patrons' ? 'patron' : 'delegate';
+    UI.qKind = kind;
+    $('#q-kind').querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.k===kind));
+    $('#q-ship').value = clean(qp.get('who'));
+    runQuery(kind, qp.get('who'));
+  }
+}
+boot();
+</script>
+</body>
+</html>
