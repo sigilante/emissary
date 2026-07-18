@@ -212,6 +212,7 @@ a response to a marked scry.
 - `[1 4 1]` bump to 411 K; modify remote scry task signatures
 - `[1 4 2]` modify remote scries for 411K
 - `[1 5 0]` port to 409K/408K: multi-kelvin `sys.kelvin`; handle `%sage` signs (replacing `%tune`, changed in 409K); observer requests via Gall's `%keen` task; keen with fully-qualified `%da` case (revisions number from 1 on 408K farms — a hardcoded revision `0` waits forever)
+- `[1 6 0]` state-tracked revision publication with working culls; JSON API at `/apps/emissary/api/v1` (state, actions, sigils) with a full-state `%json` stream on `/web/state`; new single-page dashboard at `/apps/emissary` (observer verification field with graph/matrix views, live updates, verify-me QR deep link); rudder pages remain at `/patron`, `/delegate`, `/observer`
 
 ### Planned Work
 
