@@ -200,9 +200,9 @@
       [%eyre %bound *]
     that
     ::
-      [%ames %tune *]
+      [%ames %sage *]
     =^  cards  state
-      ob-abet:(ob-arvo-tune:(ob-abed:ob queries) +>:sign-arvo)
+      ob-abet:(ob-arvo-sage:(ob-abed:ob queries) +>:sign-arvo)
     (emil cards)
     ::
       [%jael %public-keys *]
@@ -594,51 +594,33 @@
     =.  queries  (~(put bi queries) +.que -.que *quest)
     ?-    -.que
         %patron
-      =/  new-cards ::=(list card)
-        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%arvo %a [%keen ~ `spar:ames`[ship.que /g/x/0/emissary//1/patrons]]]] ::/(scot %p ship.que)]
+      =/  new-cards=(list card)
+        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%keen %.n `spar:ames`[ship.que /g/x/(scot %da now.bol)/emissary//1/patrons]]]
         ==
       (ob-emil new-cards)
       ::
         %delegate
       =/  new-cards=(list card)
-        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%arvo %a [%keen ~ `spar:ames`[ship.que /g/x/0/emissary//1/delegates]]]] ::/(scot %p ship.que)]
+        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%keen %.n `spar:ames`[ship.que /g/x/(scot %da now.bol)/emissary//1/delegates]]]
         ==
       (ob-emil new-cards)
     ==  ::  %emissary-query
-  ++  ob-arvo-tune
-    |=  [[=ship =path] roar=(unit roar:ames)]
+  ++  ob-arvo-sage
+    |=  [[=ship =path] =gage:mess:ames]
     ^+  ob
     ::  if no value then just post a cleared value
-    ?~  roar
+    ?~  gage
       =?  queries  (~(has bi queries) ship %patron)
         (~(put bi queries) ship %patron [%unasked-for now.bol ~])
       =?  queries  (~(has bi queries) ship %delegate)
         (~(put bi queries) ship %delegate [%unasked-for now.bol ~])
       ob
     ::  if a value then unpack it and update the appropriate queries
-    ?>  =(%emissary-demand p:(need q.dat.u.roar))
-    ::  XX this logic is for per-ship requests rather than all patrons/delegates
-    ::  XX keep for future use
-    :: =/  data  ;;(?([%patron ?] [%delegate ?]) q:(need q.dat.u.roar))
-    :: =/  trg=@p  (need (slaw %p ;;(@t (snag (dec (lent p.dat.u.roar)) `(list)`p.dat.u.roar))))
-    :: =?  queries  &(?=(%patron -.data) (~(has by queries) [%patron trg]))
-    ::   (~(put by queries) [%patron trg] [?:(=(%.y +:data) %valid %rejected) now.bol])
-    :: =?  queries  &(?=(%delegate -.data) (~(has by queries) [%delegate trg]))
-    ::   (~(put by queries) [%delegate trg] [?:(=(%.y +:data) %valid %rejected) now.bol])
-    =/  tag  -.q:(need q.dat.u.roar)
-    =/  data=?([%patrons p=(set ^ship)] [%delegates p=(set ^ship)])
-      ?:  =(%patrons tag)
-        =/  pats  q.dat.u.roar
-        ?~  pats  [%patrons *(set ^ship)]
-        ;;([%patrons p=(set ^ship)] [tag +:q.u.pats])
-      ?>  =(%delegates tag)
-        =/  dels  q.dat.u.roar
-        ?~  dels  [%delegates *(set ^ship)]
-        ;;([%delegates p=(set ^ship)] [tag +:q.u.dels])
-    =/  ships  ~(tap in `(set ^ship)`p.data)
-    =?  queries  &(=(%patrons tag) (~(has bi queries) ship %patron))
+    ?>  =(%emissary-demand p.gage)
+    =+  ;;(data=demand q.gage)
+    =?  queries  &(?=(%patrons -.data) (~(has bi queries) ship %patron))
       (~(put bi queries) ship %patron [%valid now.bol `p.data])
-    =?  queries  &(=(%delegates tag) (~(has bi queries) ship %delegate))
+    =?  queries  &(?=(%delegates -.data) (~(has bi queries) ship %delegate))
       (~(put bi queries) ship %delegate [%valid now.bol `p.data])
     ob
   --  ::  observer core
