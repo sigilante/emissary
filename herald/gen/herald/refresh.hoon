@@ -1,0 +1,3 @@
+:-  %say
+|=  [^ ~ ~]
+[%herald-action %refresh ~]
