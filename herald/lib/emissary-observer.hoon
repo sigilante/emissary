@@ -64,8 +64,9 @@
   ++  start
     |=  =binding
     ^-  [(list card) _obs]
+    =/  old  (~(get by obs) binding)
     =/  rec=record
-      %+  fall  (~(get by obs) binding)
+      %+  fall  old
       [[%pending ~ ~] [%pending ~ ~] now.bowl]
     =.  rec
       %=  rec
@@ -74,6 +75,11 @@
         stance.d-side    %pending
       ==
     :_  (~(put by obs) binding rec)
+    ::  cancel superseded in-flight keens before re-asking: an
+    ::  abandoned pending interest can wedge the peer's peek flow
+    %+  weld
+      ?~(old ~ (cancel-cards binding u.old))
+    ^-  (list card)
     :~  (keen patron.binding /delegates)
         (keen delegate.binding /patrons)
     ==
@@ -92,12 +98,30 @@
     ?~  stale  [cards obs]
     =^  caz  obs  (start binding.i.stale)
     $(stale t.stale, cards (weld cards caz))
-  ::  +forget: stop tracking a binding
+  ::  +forget: stop tracking a binding, cancelling in-flight keens
   ::
   ++  forget
     |=  =binding
-    ^-  _obs
-    (~(del by obs) binding)
+    ^-  [(list card) _obs]
+    =/  old  (~(get by obs) binding)
+    :_  (~(del by obs) binding)
+    ?~(old ~ (cancel-cards binding u.old))
+  ::  +cancel-cards: %yawn any side still pending; wire and path must
+  ::  reconstruct the original keen exactly (same %da case)
+  ::
+  ++  cancel-cards
+    |=  [=binding =record]
+    ^-  (list card)
+    =/  a=(list card)
+      ?.  ?=(%pending stance.p-side.record)  ~
+      [(yawn patron.binding /delegates asked.record) ~]
+    ?.  ?=(%pending stance.d-side.record)  a
+    [(yawn delegate.binding /patrons asked.record) a]
+  ++  yawn
+    |=  [who=ship what=path ts=@da]
+    ^-  card
+    :+  %pass  /emissary-observer/(scot %p who)/(scot %da ts)
+    [%arvo %a %yawn who (welp /g/x/(scot %da ts)/emissary//1 what)]
   ::  +take: absorb a %sage sign routed by the host agent.
   ::  one answer may settle a side of many tracked bindings.
   ::

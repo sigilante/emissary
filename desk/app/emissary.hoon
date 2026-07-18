@@ -460,6 +460,15 @@
       that
     =.  that  (poke %emissary-trigger !>(`trigger`[%revoke ship]))
     =.  that  (poke %emissary-decide !>(`decide`[%reject ship]))
+    ::  cancel any in-flight keens toward the breached ship: they can
+    ::  never resolve and would wedge the peer's peek flow
+    =.  that
+      %-  emil
+      %+  murn  ~(tap by (~(gut by queries) ship *quests))
+      |=  [=kind q=quest]
+      ^-  (unit card)
+      ?.  (ob-pending:ob q)  ~
+      `(ob-yawn:ob ship kind timestamp.q)
     =.  queries  (~(del by queries) ship)
     =.  requests  (~(del in requests) ship)
     %-  emil
@@ -710,23 +719,36 @@
   ++  ob-abet
     ^-  (quip card _state)
     [(flop deck) state(queries queries)]
+  ::  +ob-what: the published path a query kind reads
+  ++  ob-what
+    |=  =kind
+    ?:(?=(%patron kind) %patrons %delegates)
+  ::  +ob-yawn: cancel an in-flight keen; wire and path must
+  ::  reconstruct the original request exactly (same %da case)
+  ++  ob-yawn
+    |=  [=ship =kind ts=@da]
+    ^-  card
+    :+  %pass  /emissary/fine/(scot %da ts)
+    [%arvo %a %yawn ship /g/x/(scot %da ts)/emissary//1/[(ob-what kind)]]
+  ::  +ob-pending: a quest is in flight when %unknown with a real
+  ::  request timestamp recorded
+  ++  ob-pending
+    |=  q=quest
+    &(?=(%unknown status.q) !=(*@da timestamp.q))
   ++  ob-poke-query
     |=  que=query
     ^+  ob
-    =.  queries  (~(put bi queries) +.que -.que *quest)
-    ?-    -.que
-        %patron
-      =/  new-cards=(list card)
-        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%keen %.n `spar:ames`[ship.que /g/x/(scot %da now.bol)/emissary//1/patrons]]]
-        ==
-      (ob-emil new-cards)
-      ::
-        %delegate
-      =/  new-cards=(list card)
-        :~  `card`[%pass /emissary/fine/(scot %da now.bol) `note:agent:gall`[%keen %.n `spar:ames`[ship.que /g/x/(scot %da now.bol)/emissary//1/delegates]]]
-        ==
-      (ob-emil new-cards)
-    ==  ::  %emissary-query
+    ::  a superseded in-flight keen is cancelled, not abandoned:
+    ::  unresolvable pending interests can wedge the peer's peek flow
+    =/  old  (~(get bi queries) ship.que kind.que)
+    =?  ob  &(?=(^ old) (ob-pending u.old))
+      (ob-emit (ob-yawn ship.que kind.que timestamp.u.old))
+    =.  queries
+      (~(put bi queries) ship.que kind.que [%unknown now.bol ~])
+    %-  ob-emit
+    :+  %pass  /emissary/fine/(scot %da now.bol)
+    :+  %keen  %.n
+    `spar:ames`[ship.que /g/x/(scot %da now.bol)/emissary//1/[(ob-what kind.que)]]
   ++  ob-arvo-sage
     |=  [[=ship =path] =gage:mess:ames]
     ^+  ob

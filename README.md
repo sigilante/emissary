@@ -213,12 +213,17 @@ a response to a marked scry.
 - `[1 4 2]` modify remote scries for 411K
 - `[1 5 0]` port to 409K/408K: multi-kelvin `sys.kelvin`; handle `%sage` signs (replacing `%tune`, changed in 409K); observer requests via Gall's `%keen` task; keen with fully-qualified `%da` case (revisions number from 1 on 408K farms — a hardcoded revision `0` waits forever)
 - `[1 6 0]` state-tracked revision publication with working culls; JSON API at `/apps/emissary/api/v1` (state, actions, sigils) with a full-state `%json` stream on `/web/state`; new single-page dashboard at `/apps/emissary` (observer verification field with graph/matrix views, live updates, verify-me QR deep link); rudder pages remain at `/patron`, `/delegate`, `/observer`
+- `[1 6 1]` add `/lib/emissary-observer`, a standalone interop library for both-sides verification (see `herald/` for the reference consumer); `%yawn` superseded and breach-orphaned keens (an unresolvable pending interest can wedge a peer's peek flow — see `docs/upstream-peek-wedge.md`)
+
+##  Repository Layout
+
+- `desk/` — the `%emissary` desk, including the canonical `/lib/emissary-observer`
+- `herald/` — `%herald`, verified announcement feeds: the showcase consumer of the observer library
+- `demo/` — narrated live demo driving a fakeship fleet (`demo/demo.sh`)
+- `docs/` — dashboard API contract, design handoff, and the draft upstream runtime report
 
 ### Planned Work
 
-- rework revision management: track published revisions in agent state (the `%gt` cull-probe guards test strict prefix extensions and so never fire, leaving stale revisions uncalled — likely the source of the pre-1.5.0 connectivity bugs)
-- decouple `%grow` publication from hark presence on request receipt
-- `%yawn` outstanding keens on revoke/breach
-- observer dashboard with live updates; QR code status check
-- add observer library
 - consider `%tend`/`%germ` coops for private delegation attestations
+- file `docs/upstream-peek-wedge.md` against the runtime once triaged upstream
+- surface an interval re-verification timer (behn) in `%herald`
