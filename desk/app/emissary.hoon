@@ -7,7 +7,7 @@
     rudder
 ::
 /~  pages
-    (page:rudder [(set ship) (map ship status) (set ship) queries] ?(trigger decide query))
+    (page:rudder [(set ship) (map ship status) (set ship) queries (map path @ud)] ?(trigger decide query))
     /app/emissary/webui
 ::
 |%
@@ -15,6 +15,7 @@
   $%  state-zero
       state-one
       state-two
+      state-three
   ==
 +$  state-zero
   $:  %zero
@@ -36,10 +37,20 @@
       requests=(set ship)
       =queries
   ==
+::  pubs: last published revision per scry path, mirroring gall's
+::  farm numbering (monotonic +1 per %grow, preserved across %cull)
++$  state-three
+  $:  %three
+      patrons=(set ship)
+      delegates=(map ship status)
+      requests=(set ship)
+      =queries
+      pubs=(map path @ud)
+  ==
 +$  card  card:agent:gall
 --
 %-  agent:dbug
-=|  state-two
+=|  state-three
 =*  state  -
 ^-  agent:gall
 =<
@@ -113,15 +124,48 @@
   =/  old  !<(versioned-state old-vase)
   ?-    -.old
       %zero
-    that(state [%two patrons.old delegates.old requests.old *^queries])
+    that(state [%three patrons.old delegates.old requests.old *^queries scan-pubs])
       %one
     ::  okay to lose old queries at this point, so just bunt
-    that(state [%two patrons.old delegates.old requests.old *^queries])
+    that(state [%three patrons.old delegates.old requests.old *^queries scan-pubs])
       %two
+    that(state [%three patrons.old delegates.old requests.old queries.old scan-pubs])
+      %three
     ~&  >  '%emissary loaded'
-    :: TODO check whether pubkeys already subbed
     that(state old)
   ==
+::  +scan-pubs: recover published-revision counters from gall's farm
+::
+++  scan-pubs
+  ^-  (map path @ud)
+  =/  base=path  /(scot %p our.bol)/[dap.bol]/(scot %da now.bol)//1
+  %-  malt
+  %+  turn  .^((list path) %gt base)
+  |=  pax=path
+  [pax +:.^([%ud @ud] %gw (welp base pax))]
+::  +sieve: delegates with a given status
+::
+++  sieve
+  |=  [dels=(map ship status) wanted=status]
+  ^-  (set ship)
+  %-  silt
+  %+  turn
+    (skim ~(tap by dels) |=([=ship =status] =(wanted status)))
+  head
+::  +bind-cards: publish new revisions, culling stale ones
+::
+++  bind-cards
+  |=  [pubs=(map path @ud) bins=(list [pax=path pag=page])]
+  ^-  [(list card) (map path @ud)]
+  =|  cards=(list card)
+  |-  ^-  [(list card) (map path @ud)]
+  ?~  bins  [(flop cards) pubs]
+  =/  cur=@ud  (~(gut by pubs) pax.i.bins 0)
+  =?  cards  (gth cur 0)
+    [[%pass /emissary/fine %cull ud+cur pax.i.bins] cards]
+  =.  cards  [[%pass /emissary/fine %grow pax.i.bins pag.i.bins] cards]
+  =.  pubs   (~(put by pubs) pax.i.bins +(cur))
+  $(bins t.bins)
 ::
 ++  peek
   |=  pol=(pole knot)
@@ -145,7 +189,7 @@
   ::  /request does nothing until the point has made a decision
       [%request ~]
     =^  cards  state
-      de-abet:(de-watch:(de-abed:de patrons requests))
+      de-abet:(de-watch:(de-abed:de patrons requests pubs))
     (emil cards)
   ==
 ::
@@ -165,11 +209,11 @@
         =/  res  !<(response q.cage.sign)
         ?:  =(%accept res)
           =^  cards  state
-            pa-abet:(pa-agent-response:(pa-abed:pa delegates) res src.bol)
+            pa-abet:(pa-agent-response:(pa-abed:pa delegates pubs) res src.bol)
           (emil cards)
         ?>  =(%reject res)
         =^  cards  state
-          pa-abet:(pa-agent-response:(pa-abed:pa delegates) res src.bol)
+          pa-abet:(pa-agent-response:(pa-abed:pa delegates pubs) res src.bol)
         (emil cards)
       ==  ::  fact
       ::
@@ -239,7 +283,7 @@
       =/  tri  !<(trigger vase)
       ::  from UI
       ?>  =(our.bol src.bol)
-      pa-abet:(pa-poke-trigger:(pa-abed:pa delegates) tri)
+      pa-abet:(pa-poke-trigger:(pa-abed:pa delegates pubs) tri)
     (emil cards)
     ::
       %emissary-request
@@ -247,7 +291,7 @@
       =/  req  !<(request vase)
       ::  over the wire
       ?>  !=(our.bol src.bol)
-      de-abet:(de-poke-request:(de-abed:de patrons requests) req src.bol)
+      de-abet:(de-poke-request:(de-abed:de patrons requests pubs) req src.bol)
     (emil cards)
     ::
       %emissary-decide
@@ -255,7 +299,7 @@
       =/  dec  !<(decide vase)
       ::  from UI
       ?>  =(our.bol src.bol)
-      de-abet:(de-poke-decide:(de-abed:de patrons requests) dec)
+      de-abet:(de-poke-decide:(de-abed:de patrons requests pubs) dec)
     (emil cards)
     ::
       %emissary-query
@@ -302,154 +346,96 @@
   ==  ::  mark
 ::  patrons core
 ++  pa
-  |_  $:  patrons=(set ship)
-          delegates=(map ship status)
-          requests=(set ship)
+  |_  $:  delegates=(map ship status)
+          pubs=(map path @ud)
           deck=(list card)
       ==
   +*  pa  .
   ++  pa-emit  |=(c=card pa(deck [c deck]))
   ++  pa-emil  |=(lc=(list card) pa(deck (welp lc deck)))
   ++  pa-abed
-    |=  [=(map ship status)]
-    pa(delegates map)
+    |=  [dels=(map ship status) pub=(map path @ud)]
+    pa(delegates dels, pubs pub)
   ++  pa-abet
     ^-  (quip card _state)
-    [(flop deck) state(delegates delegates)]
+    [(flop deck) state(delegates delegates, pubs pubs)]
+  ++  pa-bind
+    |=  bins=(list [pax=path pag=page])
+    ^+  pa
+    =^  cards  pubs  (bind-cards pubs bins)
+    (pa-emil cards)
   ++  pa-poke-trigger
     |=  tri=trigger
     ^+  pa
     ?-    -.tri
         %designate
       ::?>  ~|(%cannot-designate-superior (is-supra our.bol ship.tri))
-      ?:  (~(has by delegates) ship.tri)
-        =/  status  (~(got by delegates) ship.tri)
-        ::  if valid, then don't do anything
-        ?:  =(%valid status)  pa
-        ::  if rejected, then send again
-        ?:  =(%rejected status)
-          :: build cards
-          =.  delegates  (~(put by delegates) ship.tri %pending)
-          =/  new-cards=(list card)
-            :~  [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-request !>(%designate)]
-                [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %watch /request]
-                [%pass /emissary/fine %grow /outgoing noun+`(set ship)`(silt `(list ship)`(turn (skim ~(tap by delegates) |=([=ship =^status] =(%pending status))) head))]
-            ==
-          ::  cull now-stale remote scry revisions
-          =?    new-cards
-              ::  does /outgoing exist and have content?
-              ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing))
-            :_  new-cards
-            [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing) /outgoing]
-          (pa-emil new-cards)
-        ::  if still pending, then don't do anything
-        ?>  =(%pending status)  pa
-      ::  if not yet present, then send
+      =/  stat  (~(get by delegates) ship.tri)
+      ::  if already valid or pending, nothing to do
+      ?:  |(=(`%valid stat) =(`%pending stat))  pa
+      ::  fresh or previously rejected: (re)send the request
       =.  delegates  (~(put by delegates) ship.tri %pending)
-      =/  new-cards=(list card)
+      =.  pa
+        %-  pa-emil
         :~  [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-request !>(%designate)]
             [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %watch /request]
-            [%pass /emissary/fine %grow /outgoing noun+`(set ship)`(silt `(list ship)`(turn (skim ~(tap by delegates) |=([=ship =status] =(%pending status))) head))]
         ==
-      ::  cull now-stale remote scry revisions
-      =?    new-cards
-          ::  does /outgoing exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing) /outgoing]
-      (pa-emil new-cards)
+      (pa-bind [/outgoing [%emissary-demand %outgoing (sieve delegates %pending)]]~)
     ::
         %revoke
       ?.  (~(has by delegates) ship.tri)  pa
       =.  delegates  (~(del by delegates) ship.tri)
-      =/  new-cards
+      =.  pa
+        %-  pa-emil
         :~  [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %poke %emissary-request !>(%revoke)]
             [%pass /emissary/(scot %p ship.tri) %agent [ship.tri %emissary] %leave ~]
         ==
-      (pa-emil new-cards)
-    ::
+      %-  pa-bind
+      :~  [/delegate/(scot %p ship.tri) [%emissary-demand %delegate %.n]]
+          [/delegates [%emissary-demand %delegates (sieve delegates %valid)]]
+          [/outgoing [%emissary-demand %outgoing (sieve delegates %pending)]]
+      ==
     ==  ::  %emissary-trigger
   ++  pa-agent-response
     |=  [res=response =ship]
-    ?-    res
-        %accept
-      =.  delegates  (~(put by delegates) ship %valid)
-      =/  new-cards=(list card)
-        :~  [%pass /emissary/fine %grow /delegate/(scot %p ship) noun+%.y]
-            [%pass /emissary/fine %grow /delegates [%emissary-demand %delegates `(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%valid status))) head))]]
-            [%pass /emissary/fine %grow /outgoing [%emissary-demand %outgoing `(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%pending status))) head))]]
-        ==
-      ::  cull now-stale remote scry revisions
-      =?    new-cards
-          ::  does /delegate/ship exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegate/(scot %p ship)))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegate/(scot %p ship)) /delegate/(scot %p ship)]
-      =?    new-cards
-          ::  does /delegates exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegates))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegates) /delegates]
-      =?    new-cards
-          ::  does /outgoing exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing) /outgoing]
-      (pa-emil new-cards)
-      ::
-        %reject
-      =.  delegates  (~(put by delegates) ship %rejected)
-      =/  new-cards=(list card)
-        :~  [%pass /emissary/fine %grow /delegate/(scot %p ship) noun+%.n]
-            [%pass /emissary/fine %grow /delegates [%emissary-demand %delegates `(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%valid status))) head))]]
-            [%pass /emissary/fine %grow /outgoing [%emissary-demand %outgoing `(set ^ship)`(silt `(list ^ship)`(turn (skim ~(tap by delegates) |=([=^ship =status] =(%pending status))) head))]]
-        ==
-      ::  cull now-stale remote scry revisions
-      =?    new-cards
-          ::  does /delegate/ship exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegate/(scot %p ship)))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegate/(scot %p ship)) /delegate/(scot %p ship)]
-      =?    new-cards
-          ::  does /delegates exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegates))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/delegates) /delegates]
-      =?    new-cards
-          ::  does /outgoing exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/outgoing) /outgoing]
-      (pa-emil new-cards)
-    ==  ::  %emissary-response
+    ^+  pa
+    =.  delegates
+      (~(put by delegates) ship ?:(=(%accept res) %valid %rejected))
+    %-  pa-bind
+    :~  [/delegate/(scot %p ship) [%emissary-demand %delegate =(%accept res)]]
+        [/delegates [%emissary-demand %delegates (sieve delegates %valid)]]
+        [/outgoing [%emissary-demand %outgoing (sieve delegates %pending)]]
+    ==
   --  ::  patrons core
 ::
 ::  delegates core
 ++  de
   |_  $:  patrons=(set ship)
-          delegates=(map ship status)
           requests=(set ship)
+          pubs=(map path @ud)
           deck=(list card)
       ==
   +*  de  .
   ++  de-emit  |=(c=card de(deck [c deck]))
   ++  de-emil  |=(lc=(list card) de(deck (welp lc deck)))
   ++  de-abed
-    |=  [p=(set ship) r=(set ship)]
-    de(patrons p, requests r)
+    |=  [p=(set ship) r=(set ship) pub=(map path @ud)]
+    de(patrons p, requests r, pubs pub)
   ++  de-abet
     ^-  (quip card _state)
-    [(flop deck) state(patrons patrons, requests requests)]
+    [(flop deck) state(patrons patrons, requests requests, pubs pubs)]
+  ++  de-bind
+    |=  bins=(list [pax=path pag=page])
+    ^+  de
+    =^  cards  pubs  (bind-cards pubs bins)
+    (de-emil cards)
   ++  de-watch
     |.
     ^+  de
     ?:  (~(has in patrons) src.bol)
       ::  If the patronage has already been accepted, this is redundant;
       ::  simply notify the requester.
-      %-  de-emil
-      :~  [%give %fact ~ %emissary-response !>(%accept)]
-          ::  XX formally unnecessary to update remote scry paths here
-      ==
+      (de-emit [%give %fact ~ %emissary-response !>(%accept)])
     de
   ++  de-poke-request
     |=  [req=request =ship]
@@ -459,119 +445,45 @@
       ?:  (~(has in patrons) ship)
         ::  If the patronage has already been accepted, this is redundant;
         ::  simply notify the subscribers.
-        =/  new-cards
-          :~  [%give %fact ~[/request] %emissary-response !>(%accept)]
-              ::  XX formally unnecessary to update remote scry paths here
-          ==
-        (de-emil new-cards)
-      ::  Otherwise, we need to add the patronage request to our list and notify
-      ::  the delegate-designee through %hark.
+        (de-emit [%give %fact ~[/request] %emissary-response !>(%accept)])
+      ::  Otherwise, record the request and publish; notify through
+      ::  %hark where available.
       =.  requests  (~(put in requests) ship)
-      =/  new-cards=(list card)
-        ?.  .^(? %gu /(scot %p our.bol)/hark/(scot %da now.bol)/$)  ~
-        =/  con=(list content:hark)  [[%ship ship] 'Designation request received.' ~]
-        =/  =id:hark      (end 7 (shas %emissary-trigger eny.bol))
-        =/  =rope:hark    [~ ~ q.byk.bol /(scot %p ship)/[dap.bol]]
-        =/  =action:hark  [%add-yarn & & id rope now.bol con /[dap.bol] ~]
-        :~  [%pass /hark %agent [our.bol %hark] %poke %hark-action !>(action)]
-            [%pass /emissary/fine %grow /incoming [%emissary-demand %incoming requests]]
-        ==
-      ::  cull now-stale remote scry revisions
-      =?    new-cards
-        ::  does /incoming exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming) /incoming]
-      (de-emil new-cards)
+      =.  de  (de-bind [/incoming [%emissary-demand %incoming requests]]~)
+      ?.  .^(? %gu /(scot %p our.bol)/hark/(scot %da now.bol)/$)  de
+      =/  con=(list content:hark)  [[%ship ship] 'Designation request received.' ~]
+      =/  =id:hark      (end 7 (shas %emissary-trigger eny.bol))
+      =/  =rope:hark    [~ ~ q.byk.bol /(scot %p ship)/[dap.bol]]
+      =/  =action:hark  [%add-yarn & & id rope now.bol con /[dap.bol] ~]
+      (de-emit [%pass /hark %agent [our.bol %hark] %poke %hark-action !>(action)])
       ::
         %revoke
       ?.  |((~(has in requests) ship) (~(has in patrons) ship))  de
-      =.  patrons  (~(del in patrons) ship)
+      =.  patrons   (~(del in patrons) ship)
       =.  requests  (~(del in requests) ship)
-      =/  new-cards=(list card)
-      :~  [%pass /emissary/fine %grow /patron/(scot %p ship) [%emissary-demand %patron %.n]]
-          [%pass /emissary/fine %grow /patrons [%emissary-demand %patrons patrons]]
-          [%pass /emissary/fine %grow /incoming [%emissary-demand %incoming requests]]
+      %-  de-bind
+      :~  [/patron/(scot %p ship) [%emissary-demand %patron %.n]]
+          [/patrons [%emissary-demand %patrons patrons]]
+          [/incoming [%emissary-demand %incoming requests]]
       ==
-      ::  cull now-stale remote scry revisions
-      =?    new-cards
-          ::  does /patron/ship exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship)))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship)) /patron/(scot %p ship)]
-      =?    new-cards
-          ::  does /patrons exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons) /patrons]
-      =?    new-cards
-          ::  does /incoming exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming) /incoming]
-    (de-emil new-cards)
     ==  ::  %emissary-request
-    ::
   ++  de-poke-decide
     |=  dec=decide
     ^+  de
-    ?-    -.dec
-        %accept
-      =.  patrons  (~(put in patrons) ship.dec)
-      =?  requests  (~(has in requests) ship.dec)  (~(del in requests) ship.dec)
-      =/  new-cards=(list card)
-        :~  [%give %fact ~[/request] %emissary-response !>(%accept)]
-            [%give %kick ~[/request] `src.bol]
-            [%pass /emissary/fine %grow /patron/(scot %p ship.dec) [%emissary-demand %patron %.y]]
-            [%pass /emissary/fine %grow /patrons [%emissary-demand %patrons patrons]]
-            [%pass /emissary/fine %grow /incoming [%emissary-demand %incoming requests]]
-        ==
-      ::  cull now-stale remote scry revisions
-      =?    new-cards
-          ::  does /patron/ship exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship.dec)))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship.dec)) /patron/(scot %p ship.dec)]
-      =?    new-cards
-          ::  does /patrons exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons) /patrons]
-      =?    new-cards
-          ::  does /incoming exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming) /incoming]
-      (de-emil (flop new-cards))
-      ::
-        %reject
-      =?  patrons  (~(has in patrons) ship.dec)  (~(del in patrons) ship.dec)
-      =?  requests  (~(has in requests) ship.dec)  (~(del in requests) ship.dec)
-      =/  new-cards=(list card)
-        :~  [%give %fact ~[/request] %emissary-response !>(%reject)]
-            [%give %kick ~[/request] `ship.dec]
-            [%pass /emissary/fine %grow /patron/(scot %p ship.dec) [%emissary-demand %patron %.n]]
-            [%pass /emissary/fine %grow /patrons [%emissary-demand %patrons patrons]]
-            [%pass /emissary/fine %grow /incoming [%emissary-demand %incoming requests]]
-        ==
-      ::  cull now-stale remote scry revisions
-      =?    new-cards
-          ::  does /patron/ship exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship.dec)))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patron/(scot %p ship.dec)) /patron/(scot %p ship.dec)]
-      =?    new-cards
-          ::  does /patrons exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/patrons) /patrons]
-      =?    new-cards
-          ::  does /incoming exist and have content?
-          ?=(^ `(list)`.^((list) %gt /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming))
-        :_  new-cards
-        [%pass /emissary/fine %cull .^([%ud @ud] %gw /(scot %p our.bol)/emissary/(scot %da now.bol)//1/incoming) /incoming]
-      (de-emil (flop new-cards))
-    ==  ::  %emissary-response
+    =/  acc  ?=(%accept -.dec)
+    =?  patrons  acc   (~(put in patrons) ship.dec)
+    =?  patrons  !acc  (~(del in patrons) ship.dec)
+    =.  requests  (~(del in requests) ship.dec)
+    =.  de
+      %-  de-emil
+      :~  [%give %fact ~[/request] %emissary-response !>(?:(acc %accept %reject))]
+          [%give %kick ~[/request] `ship.dec]
+      ==
+    %-  de-bind
+    :~  [/patron/(scot %p ship.dec) [%emissary-demand %patron acc]]
+        [/patrons [%emissary-demand %patrons patrons]]
+        [/incoming [%emissary-demand %incoming requests]]
+    ==  ::  %emissary-decide
   --  ::  delegates core
 ::
 ::  observer core

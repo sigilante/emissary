@@ -6,8 +6,8 @@
     rudder,
     sigil-svg=sigil
 ::
-^-  (page:rudder [(set ship) (map ship status) (set ship) queries] ?(trigger decide query))
-|_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship) queries=queries]]
+^-  (page:rudder [(set ship) (map ship status) (set ship) queries (map path @ud)] ?(trigger decide query))
+|_  [=bowl:gall * [patrons=(set ship) delegates=(map ship status) requests=(set ship) queries=queries pubs=(map path @ud)]]
 ++  argue
   |=  [headers=header-list:http body=(unit octs)]
   ^-  $@(brief:rudder query)
