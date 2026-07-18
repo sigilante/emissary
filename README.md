@@ -1,6 +1,6 @@
 #   `%emissary`
 
-**Status ~2024.10.29.  `%emissary` works for most applications but has occasional connectivity bugs via remote scry that have proven difficult to diagnose.**
+**Status ~2026.7.17.  `%emissary` `[1 5 0]` runs on 409K/408K and has been verified end-to-end (patron → delegate → third-party observer over remote scry) on a three-fakeship harness.  The remote-scry revision-culling rework is in progress; see Planned Work.**
 
 `%emissary` allows a running star to designate a planet as its representative.  (This is tied to operation not merely to ownership.)  The app is served at `/app/emissary`.
 
@@ -83,81 +83,86 @@ Served at `/app/emissary/observer`.
 
 #### Local Scries
 
+All peeks produce a `+$demand` cell from `/sur/emissary` (e.g.
+`[%delegates (set ship)]`), not a bare set, so scry with the
+`demand` type in scope (or a `*` mold):
+
 ```hoon
+> =e -build-file /=emissary=/sur/emissary/hoon
+
 :: Get set of all confirmed delegates.
-.^((set @p) %gy /=emissary=/delegates)
+.^(demand:e %gy /=emissary=/delegates)
 :: Get set of all pending outgoing requests.
-.^((set @p) %gy /=emissary=/outgoing)
+.^(demand:e %gy /=emissary=/outgoing)
 :: Get set of all pending incoming requests.
-.^((set @p) %gy /=emissary=/incoming)
+.^(demand:e %gy /=emissary=/incoming)
 :: Get set of all confirmed patrons.
-.^((set @p) %gy /=emissary=/patrons)
+.^(demand:e %gy /=emissary=/patrons)
 
 :: Check status of single delegate claim.
-.^(? %gx /=emissary=/delegate/~sampel-palnet/emissary-demand)
+.^(demand:e %gx /=emissary=/delegate/~sampel-palnet/emissary-demand)
 :: Check status of single patron claim.
-.^(? %gx /=emissary=/patron/~sampel-palnet/emissary-demand)
+.^(demand:e %gx /=emissary=/patron/~sampel-palnet/emissary-demand)
 ```
 
 #### Remote Scries
 
-The following scry endpoints are bound (with appropriate revision
-number and the same types as above):
+The following scry endpoints are bound (revisions are numbered
+from 1, with the same `+$demand` types as above):
 
 ```hoon
 :: Get set of all confirmed delegates.
-/g/x/0/emissary//delegates
+/g/x/<case>/emissary//1/delegates
 :: Get set of all pending outgoing requests.
-/g/x/0/emissary//outgoing
+/g/x/<case>/emissary//1/outgoing
 :: Get set of all pending incoming requests.
-/g/x/0/emissary//incoming
+/g/x/<case>/emissary//1/incoming
 :: Get set of all confirmed patrons.
-/g/x/0/emissary//patrons
+/g/x/<case>/emissary//1/patrons
 
 :: Check status of single delegate claim.
-/g/x/0/emissary//delegate/~sampel-palnet
+/g/x/<case>/emissary//1/delegate/~sampel-palnet
 :: Check status of single patron claim.
-/g/x/0/emissary//patron/~sampel-palnet
+/g/x/<case>/emissary//1/patron/~sampel-palnet
 ```
 
-You can request one of these values at the current time using a 
-`%keen` task (without the double `//`):
+`<case>` must be fully qualified: either a revision number
+(`%ud`, numbered from 1 — a request for an unbound revision waits
+until it is bound) or a date (`%da`, answered with the latest
+revision as of that date).  Request a value through Gall's `%keen`
+task, which normalizes the response regardless of wire protocol:
 
 ```hoon
-[%pass /emissary/fine %arvo %a %keen ~sampel-palnet /g/x/0/emissary/delegate/~sampel]
+[%pass /emissary/fine %keen %.n ~sampel-palnet /g/x/(scot %da now.bowl)/emissary//1/delegates]
 ```
 
-If the target ship has participated in `%emissary`, then that task
-will trigger the return of a `%tune` gift of the form:
+If the target ship has participated in `%emissary`, the response
+arrives in `+on-arvo` as a `%sage` sign:
 
 ```hoon
-[%tune [~sampel-palnet /emissary/fine] `roar]
+[%ames %sage [~sampel-palnet /g/x/.../emissary//1/delegates] gage]
 ```
 
-The `+$roar` will contain the remote scry path and the value in 
-its head.  (The tail is the signature.)  That head:
+where `+$gage:mess:ames` is `$@(~ page)`: `~` for an absent or
+tombstoned value, or a `page` such as
+`[%emissary-demand [%delegates (set ship)]]`.
+
+You can (locally) check currently bound scry paths and revisions
+thus (note the leading empty path segment before `1`, and that
+`%t` lists strict prefix extensions only):
 
 ```hoon
-[/g/x/0/emissary/delegate/~sampel [~ %.y]]
-```
+:: All bound paths in the agent's namespace.
+> .^((list path) %gt /=emissary=//1)
+~[/patrons /incoming /patron/~zod]
 
-You can (locally) check currently bound scry paths thus:
+:: Latest bound revision of a specific path.
+> .^([%ud @ud] %gw /=emissary=//1/patrons)
+[%ud 1]
 
-```hoon
-> .^(* %gx /=emissary=//patron/~zod)
-0
-
-> ;;([%patron ?] .^(* %gx /=emissary=//patron/~zod))
-[%patron %.n]
-
-> .^((set @p) %gy /=emissary=/incoming)
-{~zod}
-
-> .^((list path) %gt /=emissary=//patron)
-~[/patron/~zod]
-
-> .^([%ud @ud] %gw /=emissary=//patrons)
-[%ud 11]
+:: Value at a specific revision.
+> .^(* %gx /=emissary=//1/patron/~zod)
+[7.310.021.665.986.930.032 0]
 ```
 
 A third-party agent should be careful to use the latest revision 
@@ -206,8 +211,19 @@ a response to a marked scry.
 - `[1 4 0]` remove patrons and delegates on breach notification
 - `[1 4 1]` bump to 411 K; modify remote scry task signatures
 - `[1 4 2]` modify remote scries for 411K
+- `[1 5 0]` port to 409K/408K: multi-kelvin `sys.kelvin`; handle `%sage` signs (replacing `%tune`, changed in 409K); observer requests via Gall's `%keen` task; keen with fully-qualified `%da` case (revisions number from 1 on 408K farms — a hardcoded revision `0` waits forever)
+- `[1 6 0]` state-tracked revision publication with working culls; JSON API at `/apps/emissary/api/v1` (state, actions, sigils) with a full-state `%json` stream on `/web/state`; new single-page dashboard at `/apps/emissary` (observer verification field with graph/matrix views, live updates, verify-me QR deep link); rudder pages remain at `/patron`, `/delegate`, `/observer`
+- `[1 6 1]` add `/lib/emissary-observer`, a standalone interop library for both-sides verification (see `herald/` for the reference consumer); `%yawn` superseded and breach-orphaned keens (an unresolvable pending interest can wedge a peer's peek flow — see `docs/upstream-peek-wedge.md`); `%tomb` rather than `%cull` prior revisions (a tombed case remains answerable; culling is one suspected wedge trigger). Runtime-tested on both 409K (the current network floor — canonical 408K runtimes stage the 408 kernel as a waiting upgrade) and a true 408K kernel (full delegation flow and remote-scry verification between two 408K ships)
+
+##  Repository Layout
+
+- `desk/` — the `%emissary` desk, including the canonical `/lib/emissary-observer`
+- `herald/` — `%herald`, verified announcement feeds: the showcase consumer of the observer library
+- `demo/` — narrated live demo driving a fakeship fleet (`demo/demo.sh`)
+- `docs/` — dashboard API contract, design handoff, and the draft upstream runtime report
 
 ### Planned Work
 
-- add observer library
-- add QR code status check
+- consider `%tend`/`%germ` coops for private delegation attestations
+- file `docs/upstream-peek-wedge.md` against the runtime once triaged upstream
+- surface an interval re-verification timer (behn) in `%herald`

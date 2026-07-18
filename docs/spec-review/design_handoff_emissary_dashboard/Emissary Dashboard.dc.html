@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;background:#2f3019;}
+  a{color:#fed107;text-decoration:none;border-bottom:1px dotted #fed107;}
+  a:hover{color:#f7f1d2;border-bottom-color:#f7f1d2;}
+  input{font-family:'Space Mono',monospace;color:#f7f1d2;background:transparent;border:none;outline:none;}
+  input::placeholder{color:rgba(247,241,210,.35);}
+  ::selection{background:#fed107;color:#2f3019;}
+  @keyframes emblink{0%,100%{opacity:1;}50%{opacity:.2;}}
+  @keyframes emtoast{from{transform:translateY(10px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+  @keyframes emdash{to{stroke-dashoffset:-22;}}
+</style>
+</helmet>
+<div style="min-height:100vh;padding:clamp(18px,3vw,40px);color:#f7f1d2;font-family:'Jost',sans-serif;background-color:#2f3019;background-image:linear-gradient(rgba(247,241,210,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(247,241,210,.05) 1px,transparent 1px),linear-gradient(rgba(247,241,210,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(247,241,210,.025) 1px,transparent 1px);background-size:154px 154px,154px 154px,28px 28px,28px 28px;">
+
+  <div style="max-width:1240px;margin:0 auto;">
+
+    <!-- ============ HEADER ============ -->
+    <header style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;padding-bottom:16px;border-bottom:1px solid rgba(247,241,210,.28);margin-bottom:6px;">
+      <div>
+        <div style="display:flex;align-items:baseline;gap:10px;">
+          <span style="font-family:'Space Mono',monospace;font-size:30px;letter-spacing:-.01em;"><span style="color:#fed107;">%</span>emissary</span>
+          <span style="font-family:'Space Mono',monospace;font-size:11px;color:#fed107;letter-spacing:.1em;">v1</span>
+        </div>
+        <div style="font-family:'Jost',sans-serif;letter-spacing:.22em;text-transform:uppercase;font-size:11px;color:rgba(247,241,210,.6);margin-top:6px;">delegation &amp; remote-scry verification desk</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div style="display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.08em;">
+          <span style="width:8px;height:8px;background:#5dbf8d;border-radius:50%;animation:emblink 1.5s infinite;"></span>
+          <span style="color:#5dbf8d;">LIVE · /web/state</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(247,241,210,.4);padding:6px 12px 6px 8px;">
+          <div style="width:30px;height:30px;"><dc-import name="Sigil" ship="{{ ship }}" hint-size="30px,30px"></dc-import></div>
+          <div>
+            <div style="font-family:'Space Mono',monospace;font-size:13px;line-height:1.1;">{{ ship }}</div>
+            <div style="font-family:'Jost',sans-serif;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:rgba(247,241,210,.55);">this ship · star</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ OBSERVER / VERIFICATION (centerpiece) ============ -->
+    <div style="margin-top:26px;">
+      <dc-import name="Panel" title="Observer · Verification Field" tag="OBS-01 / both-sides-agree" hint-size="100%,560px">
+
+        <!-- query bar -->
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:18px;">
+          <span style="font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:rgba(247,241,210,.6);">scry →</span>
+          <div style="display:flex;align-items:center;border-bottom:1px solid rgba(247,241,210,.45);padding:2px 4px;min-width:190px;">
+            <span style="font-family:'Space Mono',monospace;color:rgba(247,241,210,.4);margin-right:2px;">~</span>
+            <input value="{{ qShip }}" onInput="{{ onQShip }}" onKeyDown="{{ onQKey }}" placeholder="sampel-palnet" style="width:160px;font-size:13px;"/>
+          </div>
+          <div style="display:flex;border:1px solid rgba(247,241,210,.4);">
+            <button onClick="{{ setKindDelegate }}" style="{{ kindDelegateStyle }}">delegates</button>
+            <button onClick="{{ setKindPatron }}" style="{{ kindPatronStyle }}">patrons</button>
+          </div>
+          <button onClick="{{ runQuery }}" style="font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.16em;text-transform:uppercase;background:#fed107;color:#2f3019;border:1px solid #fed107;padding:7px 16px;cursor:pointer;font-weight:600;" style-hover="background:transparent;color:#fed107;">run scry</button>
+          <div style="flex:1;"></div>
+          <div style="display:flex;border:1px solid rgba(247,241,210,.4);">
+            <button onClick="{{ viewGraph }}" style="{{ viewGraphStyle }}">◈ graph</button>
+            <button onClick="{{ viewMatrix }}" style="{{ viewMatrixStyle }}">▦ matrix</button>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:26px;align-items:stretch;">
+
+          <!-- LEFT: graph or matrix -->
+          <div style="flex:1 1 520px;min-width:300px;">
+
+            <sc-if value="{{ isGraph }}" hint-placeholder-val="{{ true }}">
+              <div style="position:relative;width:100%;max-width:600px;margin:0 auto;aspect-ratio:600/460;">
+                <svg viewBox="0 0 600 460" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible;">
+                  <sc-for list="{{ graph.edges }}" as="e" hint-placeholder-count="6">
+                    <line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" stroke="{{ e.halo }}" stroke-width="{{ e.hw }}" stroke-linecap="round"></line>
+                    <line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" stroke="{{ e.stroke }}" stroke-width="{{ e.width }}" stroke-dasharray="{{ e.dash }}"></line>
+                    <rect x="{{ e.sqx }}" y="{{ e.sqy }}" width="7" height="7" fill="#2f3019" stroke="{{ e.stroke }}" stroke-width="1.4"></rect>
+                    <circle cx="{{ e.dotx }}" cy="{{ e.doty }}" r="4" fill="{{ e.stroke }}"></circle>
+                    <line x1="{{ e.x1 }}" y1="{{ e.y1 }}" x2="{{ e.x2 }}" y2="{{ e.y2 }}" stroke="transparent" stroke-width="16" style="cursor:pointer;" onClick="{{ e.onClick }}"></line>
+                  </sc-for>
+                </svg>
+                <sc-for list="{{ graph.nodes }}" as="n" hint-placeholder-count="5">
+                  <div style="position:absolute;left:{{ n.leftPct }}%;top:{{ n.topPct }}%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:7px;background:#2f3019;border:1px solid #f7f1d2;padding:5px 8px;white-space:nowrap;">
+                    <div style="width:20px;height:20px;"><dc-import name="Sigil" ship="{{ n.ship }}" hint-size="20px,20px"></dc-import></div>
+                    <span style="font-family:'Space Mono',monospace;font-size:10.5px;">{{ n.ship }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isMatrix }}">
+              <div style="overflow-x:auto;padding:4px;">
+                <div style="display:flex;gap:5px;align-items:flex-end;height:74px;">
+                  <div style="width:118px;flex:none;text-align:right;padding-right:8px;font-family:'Space Mono',monospace;font-size:9px;line-height:1.35;color:rgba(247,241,210,.55);">delegate →<br/>patron ↓</div>
+                  <sc-for list="{{ ships }}" as="h" hint-placeholder-count="5">
+                    <div style="width:38px;flex:none;display:flex;justify-content:center;">
+                      <span style="font-family:'Space Mono',monospace;font-size:9px;transform:rotate(-45deg);transform-origin:bottom left;white-space:nowrap;color:rgba(247,241,210,.75);">{{ h.ship }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+                <sc-for list="{{ matrix }}" as="row" hint-placeholder-count="5">
+                  <div style="display:flex;gap:5px;align-items:center;margin-bottom:5px;">
+                    <div style="width:118px;flex:none;text-align:right;padding-right:8px;font-family:'Space Mono',monospace;font-size:10px;">{{ row.patron }}</div>
+                    <sc-for list="{{ row.cells }}" as="c">
+                      <div onClick="{{ c.onClick }}" title="{{ c.title }}" style="width:38px;height:38px;flex:none;display:grid;place-items:center;cursor:pointer;font-family:'Space Mono',monospace;font-size:15px;background:{{ c.bg }};color:{{ c.fg }};border:{{ c.border }};box-shadow:{{ c.shadow }};">{{ c.glyph }}</div>
+                    </sc-for>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <!-- legend -->
+            <div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:22px;padding-top:14px;border-top:1px dashed rgba(247,241,210,.22);font-family:'Space Mono',monospace;font-size:10px;color:rgba(247,241,210,.75);">
+              <span style="display:flex;align-items:center;gap:7px;"><span style="width:22px;height:0;border-top:2px solid #5dbf8d;"></span>verified</span>
+              <span style="display:flex;align-items:center;gap:7px;"><span style="width:22px;height:0;border-top:1.5px dashed #fed107;"></span>unconfirmed</span>
+              <span style="display:flex;align-items:center;gap:7px;"><span style="width:22px;height:0;border-top:3px solid #f05826;"></span>conflict</span>
+              <span style="display:flex;align-items:center;gap:7px;"><span style="width:7px;height:7px;border:1px solid #f7f1d2;"></span>patron</span>
+              <span style="display:flex;align-items:center;gap:7px;"><span style="width:8px;height:8px;border-radius:50%;background:#f7f1d2;"></span>delegate</span>
+            </div>
+          </div>
+
+          <!-- RIGHT: drill-down -->
+          <div style="flex:1 1 300px;min-width:270px;border-left:1px dashed rgba(247,241,210,.22);padding-left:26px;">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;color:rgba(247,241,210,.55);margin-bottom:10px;">SELECTED BINDING</div>
+            <div style="font-family:'Space Mono',monospace;font-size:16px;margin-bottom:14px;">{{ sel.p }} <span style="color:#fed107;">▸</span> {{ sel.x }}</div>
+
+            <!-- verdict banner -->
+            <div style="border:1.5px solid {{ sel.color }};padding:12px 14px;margin-bottom:20px;">
+              <div style="display:flex;align-items:center;gap:9px;">
+                <span style="width:9px;height:9px;background:{{ sel.color }};display:inline-block;"></span>
+                <span style="font-family:'Jost',sans-serif;letter-spacing:.2em;text-transform:uppercase;font-size:14px;font-weight:600;color:{{ sel.color }};">{{ sel.verdict }}</span>
+              </div>
+              <div style="font-size:12.5px;line-height:1.5;color:rgba(247,241,210,.85);margin-top:8px;">{{ sel.desc }}</div>
+            </div>
+
+            <!-- side A: patron attests -->
+            <div style="display:flex;gap:12px;margin-bottom:16px;">
+              <div style="width:26px;height:26px;flex:none;display:grid;place-items:center;border:1px solid {{ sel.A.color }};color:{{ sel.A.color }};font-family:'Space Mono',monospace;font-size:15px;">{{ sel.A.mark }}</div>
+              <div style="flex:1;">
+                <div style="font-family:'Space Mono',monospace;font-size:11.5px;">{{ sel.A.title }}</div>
+                <div style="font-family:'Jost',sans-serif;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(247,241,210,.5);margin:2px 0 3px;">patron-side attestation</div>
+                <div style="font-size:11px;color:rgba(247,241,210,.8);">{{ sel.A.sub }}</div>
+                <div style="font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(247,241,210,.55);margin-top:3px;">{{ sel.p }} keys · life {{ sel.A.life }} · <span style="color:{{ sel.A.rc }};">rift {{ sel.A.rift }}</span></div>
+                <sc-if value="{{ sel.A.showQuery }}"><button onClick="{{ sel.A.onQuery }}" style="margin-top:6px;font-family:'Space Mono',monospace;font-size:10px;background:transparent;border:1px solid rgba(247,241,210,.4);color:#f7f1d2;padding:4px 9px;cursor:pointer;" style-hover="border-color:#fed107;color:#fed107;">{{ sel.A.qlabel }}</button></sc-if>
+              </div>
+            </div>
+
+            <!-- side B: delegate attests -->
+            <div style="display:flex;gap:12px;">
+              <div style="width:26px;height:26px;flex:none;display:grid;place-items:center;border:1px solid {{ sel.B.color }};color:{{ sel.B.color }};font-family:'Space Mono',monospace;font-size:15px;">{{ sel.B.mark }}</div>
+              <div style="flex:1;">
+                <div style="font-family:'Space Mono',monospace;font-size:11.5px;">{{ sel.B.title }}</div>
+                <div style="font-family:'Jost',sans-serif;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:rgba(247,241,210,.5);margin:2px 0 3px;">delegate-side attestation</div>
+                <div style="font-size:11px;color:rgba(247,241,210,.8);">{{ sel.B.sub }}</div>
+                <div style="font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(247,241,210,.55);margin-top:3px;">{{ sel.x }} keys · life {{ sel.B.life }} · <span style="color:{{ sel.B.rc }};">rift {{ sel.B.rift }}</span></div>
+                <sc-if value="{{ sel.B.showQuery }}"><button onClick="{{ sel.B.onQuery }}" style="margin-top:6px;font-family:'Space Mono',monospace;font-size:10px;background:transparent;border:1px solid rgba(247,241,210,.4);color:#f7f1d2;padding:4px 9px;cursor:pointer;" style-hover="border-color:#fed107;color:#fed107;">{{ sel.B.qlabel }}</button></sc-if>
+              </div>
+            </div>
+          </div>
+        </div>
+      </dc-import>
+    </div>
+
+    <!-- ============ PATRON + DELEGATE ============ -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:22px;margin-top:22px;">
+
+      <!-- PATRON -->
+      <dc-import name="Panel" title="Patron · Your Delegates" tag="PAT-02" hint-size="100%,320px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+          <div style="flex:1;display:flex;align-items:center;border-bottom:1px solid rgba(247,241,210,.45);padding:2px 4px;">
+            <span style="font-family:'Space Mono',monospace;color:rgba(247,241,210,.4);margin-right:2px;">~</span>
+            <input value="{{ desig }}" onInput="{{ onDesig }}" onKeyDown="{{ onDesigKey }}" placeholder="designate a ship…" style="width:100%;font-size:13px;"/>
+          </div>
+          <button onClick="{{ doDesignate }}" style="font-family:'Jost',sans-serif;font-size:11px;letter-spacing:.14em;text-transform:uppercase;background:transparent;border:1px solid #fed107;color:#fed107;padding:7px 14px;cursor:pointer;" style-hover="background:#fed107;color:#2f3019;">designate</button>
+        </div>
+
+        <sc-for list="{{ delegateList }}" as="d" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(247,241,210,.12);">
+            <div style="width:26px;height:26px;flex:none;"><dc-import name="Sigil" ship="{{ d.ship }}" hint-size="26px,26px"></dc-import></div>
+            <span style="flex:1;font-family:'Space Mono',monospace;font-size:12.5px;">{{ d.ship }}</span>
+            <span style="font-family:'Space Mono',monospace;font-size:9px;color:rgba(247,241,210,.6);border:1px solid rgba(247,241,210,.16);padding:2px 7px;display:flex;gap:6px;">life {{ d.life }}<span style="color:{{ d.rc }};">rift {{ d.rift }}</span></span>
+            <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.1em;border:1px solid {{ d.color }};color:{{ d.color }};padding:3px 8px;">{{ d.label }}</span>
+            <button onClick="{{ d.onRevoke }}" style="font-family:'Space Mono',monospace;font-size:9.5px;background:transparent;border:1px solid rgba(247,241,210,.3);color:rgba(247,241,210,.7);padding:3px 8px;cursor:pointer;" style-hover="border-color:#f05826;color:#f05826;">revoke</button>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noDelegates }}"><div style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(247,241,210,.4);padding:12px 0;">no delegates designated.</div></sc-if>
+
+        <!-- verify me -->
+        <div style="margin-top:16px;">
+          <button onClick="{{ toggleQR }}" style="font-family:'Jost',sans-serif;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;background:transparent;border:1px dashed rgba(247,241,210,.4);color:#f7f1d2;padding:8px 14px;cursor:pointer;width:100%;" style-hover="border-color:#fed107;color:#fed107;border-style:solid;">⧉ verify me — share / QR</button>
+          <sc-if value="{{ showQR }}">
+            <div style="display:flex;gap:16px;margin-top:14px;align-items:flex-start;">
+              <div style="width:110px;height:110px;flex:none;padding:7px;background:#f7f1d2;display:grid;grid-template-columns:repeat({{ qr.n }},1fr);gap:0;">
+                <sc-for list="{{ qr.cells }}" as="q"><div style="width:100%;aspect-ratio:1;background:{{ q.bg }};"></div></sc-for>
+              </div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-family:'Jost',sans-serif;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(247,241,210,.5);margin-bottom:5px;">relative deep-link · scan on any session</div>
+                <div style="font-family:'Space Mono',monospace;font-size:10.5px;line-height:1.5;color:#fed107;word-break:break-all;">{{ deepLink }}</div>
+                <div style="font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(247,241,210,.5);margin-top:8px;">pre-fills who={{ ship }} · what=delegates and fires the scry on load.</div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </dc-import>
+
+      <!-- DELEGATE -->
+      <dc-import name="Panel" title="Delegate · Incoming &amp; Patrons" tag="DEL-03" hint-size="100%,320px">
+        <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(247,241,210,.55);margin-bottom:8px;">incoming designation requests</div>
+        <sc-for list="{{ incomingList }}" as="i" hint-placeholder-count="1">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(247,241,210,.12);">
+            <div style="width:26px;height:26px;flex:none;"><dc-import name="Sigil" ship="{{ i.ship }}" hint-size="26px,26px"></dc-import></div>
+            <span style="flex:1;font-family:'Space Mono',monospace;font-size:12.5px;">{{ i.ship }}</span>
+            <span style="font-family:'Space Mono',monospace;font-size:9px;color:rgba(247,241,210,.6);border:1px solid rgba(247,241,210,.16);padding:2px 7px;display:flex;gap:6px;">life {{ i.life }}<span style="color:{{ i.rc }};">rift {{ i.rift }}</span></span>
+            <button onClick="{{ i.onAccept }}" style="font-family:'Space Mono',monospace;font-size:9.5px;background:transparent;border:1px solid #5dbf8d;color:#5dbf8d;padding:4px 11px;cursor:pointer;" style-hover="background:#5dbf8d;color:#2f3019;">accept</button>
+            <button onClick="{{ i.onReject }}" style="font-family:'Space Mono',monospace;font-size:9.5px;background:transparent;border:1px solid rgba(240,88,38,.7);color:#f05826;padding:4px 11px;cursor:pointer;" style-hover="background:#f05826;color:#2f3019;">reject</button>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noIncoming }}"><div style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(247,241,210,.4);padding:10px 0;">no pending requests.</div></sc-if>
+
+        <div style="font-family:'Jost',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(247,241,210,.55);margin:20px 0 8px;">ships you represent</div>
+        <sc-for list="{{ patronList }}" as="p" hint-placeholder-count="1">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(247,241,210,.12);">
+            <div style="width:26px;height:26px;flex:none;"><dc-import name="Sigil" ship="{{ p.ship }}" hint-size="26px,26px"></dc-import></div>
+            <span style="flex:1;font-family:'Space Mono',monospace;font-size:12.5px;">{{ p.ship }}</span>
+            <span style="font-family:'Space Mono',monospace;font-size:9px;color:rgba(247,241,210,.6);border:1px solid rgba(247,241,210,.16);padding:2px 7px;display:flex;gap:6px;">life {{ p.life }}<span style="color:{{ p.rc }};">rift {{ p.rift }}</span></span>
+            <span style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.1em;border:1px solid #5dbf8d;color:#5dbf8d;padding:3px 8px;">patron</span>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noPatrons }}"><div style="font-family:'Space Mono',monospace;font-size:11px;color:rgba(247,241,210,.4);padding:10px 0;">no patrons.</div></sc-if>
+      </dc-import>
+    </div>
+
+    <div style="text-align:center;margin-top:28px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.1em;color:rgba(247,241,210,.4);">/apps/emissary/api/v1 · session-authenticated · updates stream on /web/state · re-subscribe on quit</div>
+  </div>
+
+  <!-- toast -->
+  <sc-if value="{{ toast }}">
+    <div style="position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:50;animation:emtoast .22s ease-out;background:#2f3019;border:1px solid {{ toast.color }};padding:11px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 6px 22px rgba(0,0,0,.4);">
+      <span style="width:8px;height:8px;background:{{ toast.color }};border-radius:50%;"></span>
+      <span style="font-family:'Space Mono',monospace;font-size:12px;color:#f7f1d2;">{{ toast.msg }}</span>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  OBS = ['~zod','~marzod','~sampel-palnet','~wicdev-wisryt','~binzod'];
+  KNOWN = {
+    '~zod|delegate':['~marzod','~wicdev-wisryt'],
+    '~marzod|patron':['~zod'],
+    '~marzod|delegate':['~sampel-palnet'],
+    '~sampel-palnet|patron':['~marzod'],
+    '~binzod|delegate':['~sampel-palnet'],
+    '~wicdev-wisryt|patron':['~zod'],
+  };
+  LR = { '~zod':{life:4,rift:0}, '~marzod':{life:2,rift:0}, '~sampel-palnet':{life:3,rift:1}, '~wicdev-wisryt':{life:1,rift:0}, '~binzod':{life:2,rift:0}, '~ridlur-figbud':{life:1,rift:0} };
+  lr(ship){ const v=this.LR[ship]||{life:1,rift:0}; return {life:v.life,rift:v.rift,rc:v.rift>0?'#f05826':'rgba(247,241,210,.55)'}; }
+  timers = [];
+
+  initState(){
+    const now = Date.now();
+    const recent = new Date(now - 5*60000).toISOString();
+    const old = new Date(now - 95*60000).toISOString();
+    const U = { status:'unknown', timestamp:null, ships:null };
+    return {
+      ship:'~marzod',
+      delegates:{ '~sampel-palnet':'valid', '~wicdev-wisryt':'pending' },
+      patrons:['~zod'],
+      incoming:['~binzod'],
+      queries:{
+        '~zod':{ delegate:{status:'valid',timestamp:recent,ships:['~marzod','~wicdev-wisryt']}, patron:{...U} },
+        '~marzod':{ patron:{status:'valid',timestamp:recent,ships:['~zod']}, delegate:{status:'valid',timestamp:recent,ships:['~sampel-palnet']} },
+        '~sampel-palnet':{ patron:{status:'valid',timestamp:old,ships:['~marzod']}, delegate:{status:'unasked-for',timestamp:recent,ships:[]} },
+        '~wicdev-wisryt':{ patron:{...U}, delegate:{...U} },
+        '~binzod':{ delegate:{status:'valid',timestamp:recent,ships:['~sampel-palnet']}, patron:{...U} },
+      },
+      selPair:{ p:'~binzod', x:'~sampel-palnet' },
+      view:'graph', qShip:'', qKind:'delegate', desig:'', showQR:false, toast:null,
+    };
+  }
+  state = this.initState();
+
+  componentDidMount(){ this.timers.push(setTimeout(()=>this.liveIncoming(), 9000)); }
+  componentWillUnmount(){ this.timers.forEach(clearTimeout); clearTimeout(this._tt); }
+
+  pushToast(msg,color){ this.setState({toast:{msg,color}}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}),3400); }
+  isStale(ts){ if(!ts) return false; return (Date.now()-Date.parse(ts))>3600000; }
+  relTime(ts){ if(!ts) return '—'; const m=Math.max(0,Math.round((Date.now()-Date.parse(ts))/60000)); if(m<60) return m+'m ago'; return Math.floor(m/60)+'h '+(m%60)+'m ago'+(m>60?' · STALE':''); }
+  norm(s){ s=(s||'').trim().replace(/^~+/,''); return s?'~'+s:''; }
+
+  liveIncoming(){ this.setState(s=>({incoming:[...s.incoming,'~ridlur-figbud']})); this.pushToast('live: ~ridlur-figbud requests you as delegate','#fed107'); }
+
+  doDesignate(){ const ship=this.norm(this.state.desig); if(!ship) return;
+    this.setState(s=>({delegates:{...s.delegates,[ship]:'pending'},desig:''}));
+    this.pushToast('designation sent → '+ship,'#fed107');
+    this.timers.push(setTimeout(()=>{ this.setState(s=>({delegates:{...s.delegates,[ship]:'valid'}})); this.pushToast(ship+' accepted — now valid','#5dbf8d'); },2600));
+  }
+  revoke(ship){ this.setState(s=>{ const d={...s.delegates}; delete d[ship]; return {delegates:d}; }); this.pushToast('revoked '+ship,'#f05826'); }
+  accept(ship){ this.setState(s=>({incoming:s.incoming.filter(x=>x!==ship),patrons:[...s.patrons,ship]})); this.pushToast('accepted '+ship+' as patron','#5dbf8d'); }
+  reject(ship){ this.setState(s=>({incoming:s.incoming.filter(x=>x!==ship)})); this.pushToast('rejected '+ship,'#f05826'); }
+
+  doQuery(kind,ship){ ship=this.norm(ship); if(!ship) return;
+    this.setState(s=>({queries:{...s.queries,[ship]:{...(s.queries[ship]||{}),[kind]:{status:'unknown',timestamp:null,ships:null}}}}));
+    this.pushToast('scry '+ship+' · '+kind+' …','#fed107');
+    this.timers.push(setTimeout(()=>{ const known=this.KNOWN[ship+'|'+kind]; const ans=known?{status:'valid',timestamp:new Date().toISOString(),ships:known}:{status:'unasked-for',timestamp:new Date().toISOString(),ships:[]};
+      this.setState(s=>({queries:{...s.queries,[ship]:{...(s.queries[ship]||{}),[kind]:ans}}})); this.pushToast('answer ◂ '+ship,'#5dbf8d'); }, 2000+Math.random()*1400));
+  }
+
+  rel(p,x){ const q=this.state.queries; const pd=q[p]&&q[p].delegate; const xp=q[x]&&q[x].patron;
+    const pAtt=!!(pd&&pd.status==='valid'&&pd.ships&&pd.ships.indexOf(x)>=0);
+    const xAtt=!!(xp&&xp.status==='valid'&&xp.ships&&xp.ships.indexOf(p)>=0);
+    const pAns=!!(pd&&(pd.status==='valid'||pd.status==='unasked-for'));
+    const xAns=!!(xp&&(xp.status==='valid'||xp.status==='unasked-for'));
+    if(pAtt&&xAtt) return {state:'verified',stale:this.isStale(pd.timestamp)||this.isStale(xp.timestamp)};
+    if(pAtt||xAtt){ const otherAnswered=pAtt?xAns:pAns; return {state:otherAnswered?'conflict':'unconfirmed',stale:false}; }
+    return {state:'none',stale:false};
+  }
+  edgeStyle(st){ if(st==='verified') return {stroke:'#5dbf8d',dash:'0',width:2.4}; if(st==='unconfirmed') return {stroke:'#fed107',dash:'6 5',width:1.8}; if(st==='conflict') return {stroke:'#f05826',dash:'0',width:3.2}; return {stroke:'rgba(247,241,210,.2)',dash:'2 4',width:1}; }
+
+  side(role,p,x){ const q=this.state.queries;
+    const rec = role==='A' ? (q[p]&&q[p].delegate) : (q[x]&&q[x].patron);
+    const target = role==='A' ? x : p;
+    const queried = !!(rec && rec.status && rec.status!=='unknown');
+    const attests = !!(rec && rec.status==='valid' && rec.ships && rec.ships.indexOf(target)>=0);
+    const title = role==='A' ? (p+' → '+x) : (x+' → '+p);
+    let mark,color,sub;
+    if(!queried){ mark='?'; color='#fed107'; sub='not queried yet'; }
+    else if(attests){ mark='✓'; color='#5dbf8d'; sub='attests · '+this.relTime(rec.timestamp); }
+    else { mark='✕'; color='#f05826'; sub='answered — no such binding · '+this.relTime(rec.timestamp); }
+    const kind = role==='A' ? 'delegate' : 'patron';
+    const qs = role==='A' ? p : x;
+    const who = role==='A' ? p : x; const k=this.lr(who);
+    return { title, mark, color, sub, life:k.life, rift:k.rift, rc:k.rc, showQuery:!attests, onQuery:()=>this.doQuery(kind,qs), qlabel:'scry '+qs+' ▸ '+kind+'s' };
+  }
+
+  qrGen(str){ let h=2166136261>>>0; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619)>>>0; }
+    const n=13, cells=[];
+    for(let r=0;r<n;r++){ for(let c=0;c<n;c++){ let on; let f=null;
+      if(r<7&&c<7) f=[r,c]; else if(r<7&&c>=n-7) f=[r,c-(n-7)]; else if(r>=n-7&&c<7) f=[r-(n-7),c];
+      if(f){ const fr=f[0],fc=f[1]; const b=(fr===0||fr===6||fc===0||fc===6); const ctr=(fr>=2&&fr<=4&&fc>=2&&fc<=4); on=b||ctr; }
+      else { h=Math.imul(h^(r*131+c*17),16777619)>>>0; on=((h>>>9)&1)===1; }
+      cells.push({ bg: on?'#2f3019':'transparent' }); } }
+    return { n, cells };
+  }
+
+  btn(active){ return 'font-family:\'Jost\',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:6px 13px;cursor:pointer;border:none;'+(active?'background:#f7f1d2;color:#2f3019;':'background:transparent;color:rgba(247,241,210,.7);'); }
+
+  renderVals(){
+    const st=this.state, q=st.queries;
+    const axis=Array.from(new Set([...this.OBS, ...Object.keys(q)]));
+    const cx=300,cy=220,R=165,N=axis.length, pos={};
+    axis.forEach((s,i)=>{ const a=(-90+i*360/N)*Math.PI/180; pos[s]={x:cx+R*Math.cos(a),y:cy+R*Math.sin(a)}; });
+
+    // graph
+    const nodes=axis.map(s=>({ ship:s, leftPct:pos[s].x/600*100, topPct:pos[s].y/460*100 }));
+    const edges=[];
+    axis.forEach(p=>axis.forEach(x=>{ if(p===x) return; const r=this.rel(p,x); if(r.state==='none') return;
+      const A=pos[p],B=pos[x]; let dx=B.x-A.x,dy=B.y-A.y; const L=Math.hypot(dx,dy)||1; dx/=L; dy/=L;
+      const off=6*(p<x?1:-1), nx=-dy*off, ny=dx*off;
+      const x1=A.x+dx*44+nx, y1=A.y+dy*44+ny, x2=B.x-dx*44+nx, y2=B.y-dy*44+ny;
+      const es=this.edgeStyle(r.state);
+      const selc=st.selPair&&st.selPair.p===p&&st.selPair.x===x;
+      edges.push({ p,x,x1,y1,x2,y2, stroke:es.stroke, dash:es.dash, width:selc?es.width+1.2:es.width,
+        halo:selc?'rgba(254,209,7,.35)':'transparent', hw:selc?10:0,
+        sqx:x1-3.5, sqy:y1-3.5, dotx:x2, doty:y2,
+        onClick:()=>this.setState({selPair:{p,x}}) }); }));
+
+    // matrix
+    const cellFor=(p,x)=>{ if(p===x) return {glyph:'',bg:'repeating-linear-gradient(45deg,transparent 0 3px,rgba(247,241,210,.1) 3px 4px)',fg:'transparent',border:'1px solid rgba(247,241,210,.14)',shadow:'none',title:''};
+      const r=this.rel(p,x); const selc=st.selPair&&st.selPair.p===p&&st.selPair.x===x;
+      const shadow=selc?'0 0 0 2px #fed107':'none'; const M={
+        verified:{glyph:'✓',fg:'#5dbf8d',border:'1px solid #5dbf8d',bg:'rgba(93,191,141,.08)'},
+        unconfirmed:{glyph:'~',fg:'#fed107',border:'1px dashed #fed107',bg:'transparent'},
+        conflict:{glyph:'✕',fg:'#f05826',border:'2px solid #f05826',bg:'rgba(240,88,38,.1)'},
+        none:{glyph:'·',fg:'rgba(247,241,210,.3)',border:'1px solid rgba(247,241,210,.14)',bg:'transparent'} }[r.state];
+      return {...M,shadow,title:p+' ▸ '+x+' : '+r.state+(r.stale?' (stale)':''),onClick:()=>this.setState({selPair:{p,x}})}; };
+    const matrix=axis.map(p=>({ patron:p, cells:axis.map(x=>cellFor(p,x)) }));
+
+    // selected drilldown
+    const sp=st.selPair, r=this.rel(sp.p,sp.x);
+    const V={ verified:{verdict:'verified',color:'#5dbf8d',desc:'Both sides attest. This delegation is cryptographically confirmed by remote scry.'+(r.stale?' One attestation is >1h old — re-query to refresh.':'')},
+      unconfirmed:{verdict:'unconfirmed',color:'#fed107',desc:'One side attests; the other has not been queried. Scry the missing side to confirm.'},
+      conflict:{verdict:'conflict',color:'#f05826',desc:'One side attests the binding; the other answered without the counterpart. Revocation in flight — or a breach. Investigate.'},
+      none:{verdict:'no relationship',color:'rgba(247,241,210,.55)',desc:'Neither side attests this pairing.'} }[r.state];
+    const sel={ p:sp.p, x:sp.x, verdict:V.verdict, color:V.color, desc:V.desc, A:this.side('A',sp.p,sp.x), B:this.side('B',sp.p,sp.x) };
+    if(r.state==='conflict'){ const xr=this.lr(sp.x).rift, pr=this.lr(sp.p).rift; if(xr>0||pr>0){ sel.desc += ' ' + (xr>=pr?sp.x:sp.p) + ' is at rift ' + Math.max(xr,pr) + ' — a breach likely invalidated the older attestation.'; } }
+
+    // lists
+    const chip=(s)=>({valid:{color:'#5dbf8d',label:'VALID'},pending:{color:'#fed107',label:'PENDING'},rejected:{color:'#f05826',label:'REJECTED'}}[s]||{color:'#fed107',label:s.toUpperCase()});
+    const delegateList=Object.keys(st.delegates).map(ship=>{ const c=chip(st.delegates[ship]); const k=this.lr(ship); return {ship,color:c.color,label:c.label,life:k.life,rift:k.rift,rc:k.rc,onRevoke:()=>this.revoke(ship)}; });
+    const incomingList=st.incoming.map(ship=>{ const k=this.lr(ship); return {ship,life:k.life,rift:k.rift,rc:k.rc,onAccept:()=>this.accept(ship),onReject:()=>this.reject(ship)}; });
+    const patronList=st.patrons.map(ship=>{ const k=this.lr(ship); return {ship,life:k.life,rift:k.rift,rc:k.rc}; });
+
+    const deepLink='/apps/emissary/observer?who='+st.ship+'&what=delegates';
+
+    return {
+      ship:st.ship, toast:st.toast,
+      qShip:st.qShip, desig:st.desig, showQR:st.showQR,
+      onQShip:e=>this.setState({qShip:e.target.value}),
+      onQKey:e=>{ if(e.key==='Enter') this.doQuery(st.qKind,st.qShip); },
+      onDesig:e=>this.setState({desig:e.target.value}),
+      onDesigKey:e=>{ if(e.key==='Enter') this.doDesignate(); },
+      setKindDelegate:()=>this.setState({qKind:'delegate'}), setKindPatron:()=>this.setState({qKind:'patron'}),
+      kindDelegateStyle:this.btn(st.qKind==='delegate'), kindPatronStyle:this.btn(st.qKind==='patron'),
+      runQuery:()=>this.doQuery(st.qKind,st.qShip),
+      viewGraph:()=>this.setState({view:'graph'}), viewMatrix:()=>this.setState({view:'matrix'}),
+      viewGraphStyle:this.btn(st.view==='graph'), viewMatrixStyle:this.btn(st.view==='matrix'),
+      isGraph:st.view==='graph', isMatrix:st.view==='matrix',
+      graph:{nodes,edges}, ships:axis.map(s=>({ship:s})), matrix, sel,
+      doDesignate:()=>this.doDesignate(), toggleQR:()=>this.setState(s=>({showQR:!s.showQR})),
+      delegateList, incomingList, patronList,
+      noDelegates:delegateList.length===0, noIncoming:incomingList.length===0, noPatrons:patronList.length===0,
+      qr:this.qrGen(deepLink), deepLink,
+    };
+  }
+}
+</script>
+</body>
+</html>

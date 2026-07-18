@@ -1,0 +1,8 @@
+:~  title+'%herald'
+    info+'Verified announcement feeds: posts speak as a patron, marked live via %emissary delegation.'
+    color+0xfe.d107
+    site+/apps/herald
+    version+[0 1 0]
+    website+'https://github.com/sigilante/emissary'
+    license+'MIT'
+==
