@@ -172,9 +172,12 @@
   =|  cards=(list card)
   |-  ^-  [(list card) (map path @ud)]
   ?~  bins  [(flop cards) pubs]
+  ::  tombstone (not cull) the prior revision: a tombed case stays
+  ::  in the farm as a hash, while a culled case can never be bound
+  ::  or answered again — hazardous to racing observers
   =/  cur=@ud  (~(gut by pubs) pax.i.bins 0)
   =?  cards  (gth cur 0)
-    [[%pass /emissary/fine %cull ud+cur pax.i.bins] cards]
+    [[%pass /emissary/fine %tomb ud+cur pax.i.bins] cards]
   =.  cards  [[%pass /emissary/fine %grow pax.i.bins pag.i.bins] cards]
   =.  pubs   (~(put by pubs) pax.i.bins +(cur))
   $(bins t.bins)

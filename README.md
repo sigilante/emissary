@@ -213,7 +213,7 @@ a response to a marked scry.
 - `[1 4 2]` modify remote scries for 411K
 - `[1 5 0]` port to 409K/408K: multi-kelvin `sys.kelvin`; handle `%sage` signs (replacing `%tune`, changed in 409K); observer requests via Gall's `%keen` task; keen with fully-qualified `%da` case (revisions number from 1 on 408K farms — a hardcoded revision `0` waits forever)
 - `[1 6 0]` state-tracked revision publication with working culls; JSON API at `/apps/emissary/api/v1` (state, actions, sigils) with a full-state `%json` stream on `/web/state`; new single-page dashboard at `/apps/emissary` (observer verification field with graph/matrix views, live updates, verify-me QR deep link); rudder pages remain at `/patron`, `/delegate`, `/observer`
-- `[1 6 1]` add `/lib/emissary-observer`, a standalone interop library for both-sides verification (see `herald/` for the reference consumer); `%yawn` superseded and breach-orphaned keens (an unresolvable pending interest can wedge a peer's peek flow — see `docs/upstream-peek-wedge.md`)
+- `[1 6 1]` add `/lib/emissary-observer`, a standalone interop library for both-sides verification (see `herald/` for the reference consumer); `%yawn` superseded and breach-orphaned keens (an unresolvable pending interest can wedge a peer's peek flow — see `docs/upstream-peek-wedge.md`); `%tomb` rather than `%cull` prior revisions (a tombed case remains answerable; culling is one suspected wedge trigger). Runtime-tested on a 409K kernel (the current network floor — 408K runtimes stage the 408 kernel as a waiting upgrade); 408K compatibility verified against kernel source
 
 ##  Repository Layout
 
