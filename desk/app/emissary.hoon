@@ -4,7 +4,10 @@
     default-agent,
     *emissary,
     *mip,
-    rudder
+    rudder,
+    schooner,
+    server,
+    sigil-svg=sigil
 ::
 /~  pages
     (page:rudder [(set ship) (map ship status) (set ship) queries (map path @ud)] ?(trigger decide query))
@@ -72,7 +75,10 @@
 ++  on-poke
   |=  [=mark =vase]
   ^-  (quip card _this)
+  =/  old  state
   =^  cards  state  abet:(poke:eng mark vase)
+  =?  cards  !=(old state)
+    (snoc cards `card`[%give %fact ~[/web/state] %json !>(state-json:eng)])
   [cards this]
 ::
 ++  on-peek
@@ -82,7 +88,10 @@
 ++  on-arvo
   |=  [=wire =sign-arvo]
   ^-  (quip card _this)
-  =^  cards  state  abet:(arvo:eng wire sign-arvo) 
+  =/  old  state
+  =^  cards  state  abet:(arvo:eng wire sign-arvo)
+  =?  cards  !=(old state)
+    (snoc cards `card`[%give %fact ~[/web/state] %json !>(state-json:eng)])
   [cards this]
 ++  on-watch
   |=  =path
@@ -93,7 +102,10 @@
 ++  on-agent
   |=  [=wire =sign:agent:gall]
   ^-  (quip card _this)
+  =/  old  state
   =^  cards  state  abet:(agent:eng wire sign)
+  =?  cards  !=(old state)
+    (snoc cards `card`[%give %fact ~[/web/state] %json !>(state-json:eng)])
   [cards this]
 ++  on-fail   on-fail:default
 --
@@ -166,6 +178,157 @@
   =.  cards  [[%pass /emissary/fine %grow pax.i.bins pag.i.bins] cards]
   =.  pubs   (~(put by pubs) pax.i.bins +(cur))
   $(bins t.bins)
+::  +iso: @da as ISO-8601 UTC cord
+::
+++  iso
+  |=  da=@da
+  ^-  @t
+  =/  yr  (yore da)
+  =/  pad
+    |=  [w=@ud n=@ud]
+    ^-  tape
+    =/  t  (a-co:co n)
+    (weld (reap (sub w (min w (lent t))) '0') t)
+  %-  crip
+  ;:  weld
+    (pad 4 y.yr)  "-"  (pad 2 m.yr)  "-"  (pad 2 d.t.yr)
+    "T"  (pad 2 h.t.yr)  ":"  (pad 2 m.t.yr)  ":"  (pad 2 s.t.yr)  "Z"
+  ==
+::  +state-json: the /api/v1/state document (see docs/dashboard-api.md)
+::
+++  state-json
+  ^-  json
+  =*  ej  enjs:format
+  =/  all=(set ship)
+    =/  s  (~(put in (~(uni in patrons) requests)) our.bol)
+    =.  s
+      %+  roll  ~(tap by delegates)
+      |=([[p=ship *] a=_s] (~(put in a) p))
+    %+  roll  ~(tap by queries)
+    |=  [[p=ship qs=quests] a=_s]
+    =.  a  (~(put in a) p)
+    %+  roll  ~(tap by qs)
+    |=  [[* q=quest] b=_a]
+    ?~  ships.q  b
+    (~(uni in b) u.ships.q)
+  %-  pairs:ej
+  :~  :-  'ship'  s+(scot %p our.bol)
+      :-  'delegates'
+      %-  pairs:ej
+      %+  turn  ~(tap by delegates)
+      |=([p=ship t=status] [(scot %p p) s+t])
+      :-  'patrons'   a+(turn ~(tap in patrons) |=(p=ship s+(scot %p p)))
+      :-  'incoming'  a+(turn ~(tap in requests) |=(p=ship s+(scot %p p)))
+      :-  'queries'
+      %-  pairs:ej
+      %+  turn  ~(tap by queries)
+      |=  [p=ship qs=quests]
+      :-  (scot %p p)
+      %-  pairs:ej
+      %+  turn  ~(tap by qs)
+      |=  [k=kind q=quest]
+      :-  k
+      %-  pairs:ej
+      :~  ['status' s+status.q]
+          ['timestamp' ?:(=(*@da timestamp.q) ~ s+(iso timestamp.q))]
+          :-  'ships'
+          ?~  ships.q  ~
+          a+(turn ~(tap in u.ships.q) |=(w=ship s+(scot %p w)))
+      ==
+      :-  'keys'
+      %-  pairs:ej
+      %+  turn  ~(tap in all)
+      |=  p=ship
+      :-  (scot %p p)
+      =/  lyf  .^((unit @ud) %j /(scot %p our.bol)/lyfe/(scot %da now.bol)/(scot %p p))
+      =/  ryf  .^((unit @ud) %j /(scot %p our.bol)/ryft/(scot %da now.bol)/(scot %p p))
+      %-  pairs:ej
+      :~  ['life' (numb:ej (fall lyf 0))]
+          ['rift' (numb:ej (fall ryf 0))]
+      ==
+  ==
+::  +spout: emit an http response
+::
+++  spout
+  |=  [id=@ta status=@ud hed=headers:schooner res=resource:schooner]
+  ^+  that
+  ::  pre-flop: +emil prepends without reversing, so +abet's flop
+  ::  would otherwise emit these response cards in reverse order
+  (emil (flop (response:schooner id status hed res)))
+::  +api: /apps/emissary/api/v1 dispatch
+::
+++  api
+  |=  [ord=order:rudder rest=(pole @t)]
+  ^+  that
+  =/  id  id.ord
+  ?.  authenticated.ord
+    (spout id 401 ~ [%plain "unauthorized"])
+  ?+    rest  (spout id 404 ~ [%plain "not found"])
+      [%state ~]
+    ?.  =(%'GET' method.request.ord)
+      (spout id 405 ~ [%plain "method not allowed"])
+    (spout id 200 ~ [%json state-json])
+  ::
+      [%sigil w=@ ~]
+    ?.  =(%'GET' method.request.ord)
+      (spout id 405 ~ [%plain "method not allowed"])
+    ?~  who=(slaw %p w.rest)
+      (spout id 400 ~ [%plain "bad ship"])
+    ?.  ?=(?(%czar %king %duke) (clan:title u.who))
+      (spout id 404 ~ [%plain "no sigil for moons or comets"])
+    =/  svg=manx
+      %.  u.who
+      %_  sigil-svg
+        fg  "#f7f1d2"
+        bg  "#2f3019"
+      ==
+    %:  spout  id  200
+      ['cache-control'^'public, max-age=86400']~
+      [%image-svg (crip (en-xml:html svg))]
+    ==
+  ::
+      [%action ~]
+    ?.  =(%'POST' method.request.ord)
+      (spout id 405 ~ [%plain "method not allowed"])
+    =/  bod  body.request.ord
+    ?~  bod  (spout id 400 ~ [%plain "empty body"])
+    =/  jon=(unit json)  (de:json:html q.u.bod)
+    ?.  ?=([~ %o *] jon)
+      (spout id 400 ~ [%plain "malformed json"])
+    =/  act  ~(tap by p.u.jon)
+    ?.  ?=([[@ *] ~] act)
+      (spout id 400 ~ [%plain "expected exactly one action"])
+    =/  key  p.i.act
+    =/  obj  q.i.act
+    ?.  ?=([%o *] obj)
+      (spout id 400 ~ [%plain "malformed action"])
+    =/  shp=(unit @p)
+      ?~  s=(~(get by p.obj) 'ship')  ~
+      ?.  ?=([~ %s *] s)  ~
+      (slaw %p p.u.s)
+    ?~  shp  (spout id 400 ~ [%plain "bad ship"])
+    =/  kin=(unit kind)
+      ?~  k=(~(get by p.obj) 'kind')  ~
+      ?.  ?=([~ %s *] k)  ~
+      ?.  ?=(?(%delegate %patron) p.u.k)  ~
+      `p.u.k
+    =^  done=?  that
+      ?+    key  [| that]
+          %designate
+        [& (poke %emissary-trigger !>(`trigger`[%designate u.shp]))]
+          %revoke
+        [& (poke %emissary-trigger !>(`trigger`[%revoke u.shp]))]
+          %accept
+        [& (poke %emissary-decide !>(`decide`[%accept u.shp]))]
+          %reject
+        [& (poke %emissary-decide !>(`decide`[%reject u.shp]))]
+          %query
+        ?~  kin  [| that]
+        [& (poke %emissary-query !>(`query`[u.kin u.shp]))]
+      ==
+    ?.  done  (spout id 400 ~ [%plain "unknown action"])
+    (spout id 204 ~ [%none ~])
+  ==
 ::
 ++  peek
   |=  pol=(pole knot)
@@ -186,6 +349,9 @@
   ::
       [%http-response *]
     that
+  ::  /web/state: full-state json stream; every fact is a whole document
+      [%web %state ~]
+    (emit [%give %fact ~ %json !>(state-json)])
   ::  /request does nothing until the point has made a decision
       [%request ~]
     =^  cards  state
@@ -311,11 +477,15 @@
     (emil cards)
     ::
       %handle-http-request
+    =/  ord  !<(order:rudder vase)
+    =/  lyn  (parse-request-line:server url.request.ord)
+    ?:  =(~['apps' 'emissary' 'api' 'v1'] (scag 4 site.lyn))
+      (api ord (slag 4 site.lyn))
     =;  out=(quip card _+.state)
       =.  +.state  +.out
       :: flop here so that the kick from rudder isn't first
       (emil (flop -.out))
-    %.  [bol !<(order:rudder vase) +.state]
+    %.  [bol ord +.state]
     %-  (steer:rudder _+.state ?(trigger decide query))
     :^    pages
         (point:rudder /apps/[dap.bol] & ~(key by pages))
