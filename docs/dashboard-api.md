@@ -49,9 +49,15 @@ Full local state for the authenticated ship:
         "ships": null
       }
     }
+  },
+  "keys": {
+    "~zod":           { "life": 2, "rift": 0 },
+    "~sampel-palnet": { "life": 3, "rift": 1 }
   }
 }
 ```
+
+- `keys` — jael-sourced `life` (key revision) and `rift` (breach count) for every ship appearing anywhere in the document. A rift bump means the ship breached, invalidating older attestations; the UI renders rift red when > 0 (added per the design review's life:rift treatment).
 
 - `delegates` — ships this ship has designated, with per-ship status: `"pending" | "valid" | "rejected"`. (Patron role.)
 - `patrons` — ships whose designation this ship has accepted. (Delegate role.)
